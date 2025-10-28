@@ -57,6 +57,7 @@ export const login = async (req, res) => {
     res.status(500).json({ message: "Errore server", error: error.message });
   }
 };
+<<<<<<< HEAD
 
 export const logout = async (req, res) => {
   try {
@@ -67,3 +68,5 @@ export const logout = async (req, res) => {
     res.status(500).json({ message: "Errore durante il logout", error });
   }
 };
+=======
+>>>>>>> 1552c31 (parte funzionante)
