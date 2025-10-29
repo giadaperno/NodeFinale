@@ -28,10 +28,26 @@ const Event = sequelize.define("Event", {
     type: DataTypes.DATE,
     allowNull: false,
   },
+  capacity: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  image: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
   isApproved: {
     type: DataTypes.BOOLEAN,
-    defaultValue: false, // l'admin deve approvare
+    defaultValue: false,
+  },
+  UserId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
   },
 });
+
+// Associazioni
+Event.belongsTo(User, { foreignKey: "UserId" }); // ogni evento appartiene a un utente
+User.hasMany(Event, { foreignKey: "UserId" });   // un utente può avere molti eventi
 
 export default Event;
