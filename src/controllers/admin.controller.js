@@ -1,13 +1,11 @@
 import Event from "../models/event.model.js";
 import User from "../models/user.model.js";
 
-<<<<<<< HEAD
+
 /**
  * Approva evento
  */
-=======
-// Approva evento
->>>>>>> 1552c31 (parte funzionante)
+
 export const approveEvent = async (req, res) => {
   const { id } = req.params;
   try {
@@ -16,8 +14,6 @@ export const approveEvent = async (req, res) => {
 
     event.isApproved = true;
     await event.save();
-
-<<<<<<< HEAD
     res.json({ message: "Evento approvato con successo", event });
   } catch (error) {
     res.status(500).json({ message: "Errore server", error: error.message });
@@ -27,22 +23,13 @@ export const approveEvent = async (req, res) => {
 /**
  * Rifiuta evento
  */
-=======
-    res.json({ message: "Evento approvato", event });
-  } catch (error) {
-    res.status(500).json({ message: "Errore server", error });
-  }
-};
 
-// Rifiuta evento (opzionale: puoi eliminarlo o segnalarlo)
->>>>>>> 1552c31 (parte funzionante)
 export const rejectEvent = async (req, res) => {
   const { id } = req.params;
   try {
     const event = await Event.findByPk(id);
     if (!event) return res.status(404).json({ message: "Evento non trovato" });
 
-<<<<<<< HEAD
     await event.destroy(); // oppure aggiungere flag "isRejected"
     res.json({ message: "Evento rifiutato ed eliminato" });
   } catch (error) {
@@ -53,16 +40,7 @@ export const rejectEvent = async (req, res) => {
 /**
  * Blocca utente
  */
-=======
-    await event.destroy(); // oppure aggiungi flag "rejected"
-    res.json({ message: "Evento rifiutato" });
-  } catch (error) {
-    res.status(500).json({ message: "Errore server", error });
-  }
-};
 
-// Blocca utente
->>>>>>> 1552c31 (parte funzionante)
 export const blockUser = async (req, res) => {
   const { id } = req.params;
   try {
@@ -72,7 +50,6 @@ export const blockUser = async (req, res) => {
     user.isActive = false;
     await user.save();
 
-<<<<<<< HEAD
     res.json({ message: `Utente ${user.name} bloccato con successo`, user });
   } catch (error) {
     res.status(500).json({ message: "Errore durante il blocco utente", error: error.message });
@@ -109,10 +86,4 @@ export const getAllUsers = async (req, res) => {
   }
 };
 
-=======
-    res.json({ message: "Utente bloccato", user });
-  } catch (error) {
-    res.status(500).json({ message: "Errore server", error });
-  }
-};
->>>>>>> 1552c31 (parte funzionante)
+

@@ -28,6 +28,14 @@ const User = sequelize.define("User", {
     type: DataTypes.BOOLEAN,
     defaultValue: true,
   },
+  resetToken: {
+  type: DataTypes.STRING,
+  allowNull: true,
+  },
+  resetTokenExpiry: {
+    type: DataTypes.DATE,
+    allowNull: true,
+  },
 });
 
 export default User;
