@@ -1,3 +1,4 @@
+import { Op } from "sequelize";
 import Event from "../models/event.model.js";
 
 // Crea evento
@@ -27,10 +28,18 @@ export const createEvent = async (req, res) => {
   }
 };
 
-// Lista eventi approvati
+// Lista eventi pubblici, con filtri per data, categoria e luogo (con ricerca parziale)
 export const listEvents = async (req, res) => {
   try {
-    const events = await Event.findAll({ where: { isApproved: true } });
+    const { date, category, location } = req.query;
+
+    const filters = { isApproved: true };
+
+    if (date) filters.date = date;
+    if (category) filters.category = { [Op.like]: `%${category}%` };
+    if (location) filters.location = { [Op.like]: `%${location}%` };
+
+    const events = await Event.findAll({ where: filters });
     res.json(events);
   } catch (error) {
     console.error(error);
