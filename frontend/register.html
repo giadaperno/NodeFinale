@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EventHub - Registrati</title>
+<style>
+  body { font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background: #f5f5f5; }
+  .register-container { background: #fff; padding: 30px; border-radius: 8px; width: 350px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+  h2 { margin: 0 0 5px 0; }
+  p.subtitle { margin: 0 0 20px 0; color: #555; font-size: 0.9em; }
+  input { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; }
+  button { width: 100%; padding: 10px; background: #28a745; color: #fff; border: none; border-radius: 4px; cursor: pointer; margin-bottom: 10px; }
+  button:hover { background: #218838; }
+  .link { text-align: center; margin-top: 10px; font-size: 0.9em; }
+  .link a { color: #007bff; text-decoration: none; }
+  .link a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+
+<div class="register-container">
+  <h2>Registrati</h2>
+  <p class="subtitle">Crea il tuo account su EventHub per iscriverti agli eventi</p>
+
+  <input type="text" id="name" placeholder="Nome">
+  <input type="email" id="email" placeholder="Email">
+  <input type="password" id="password" placeholder="Password">
+
+  <button id="registerBtn">Registrati</button>
+  <button id="homeBtn" style="background:#6c757d;">Home</button>
+
+  <div class="link">Hai già un account? <a href="/login.html">Accedi</a></div>
+
+  <div id="message" style="color:red; margin-top:10px;"></div>
+</div>
+
+<script>
+document.getElementById('registerBtn').addEventListener('click', async () => {
+  const name = document.getElementById('name').value;
+  const email = document.getElementById('email').value;
+  const password = document.getElementById('password').value;
+
+  try {
+    const res = await fetch('/api/auth/register', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ name, email, password })
+    });
+
+    const data = await res.json();
+    const messageDiv = document.getElementById('message');
+
+    if (res.ok) {
+      // Reindirizza subito al login
+      window.location.href = '/login.html';
+    } else {
+      messageDiv.textContent = data.message || 'Errore nella registrazione';
+    }
+  } catch (err) {
+    console.error(err);
+    document.getElementById('message').textContent = 'Errore nella richiesta';
+  }
+});
+
+document.getElementById('homeBtn').addEventListener('click', () => {
+  window.location.href = '/index.html';
+});
+</script>
+
+</body>
+</html>

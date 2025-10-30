@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EventHub - Area Admin</title>
+<style>
+  body { font-family: Arial, sans-serif; margin: 20px; }
+  header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+  h1 { margin: 0; }
+  .dashboard { display: flex; gap: 30px; flex-wrap: wrap; }
+  .box { border: 1px solid #ccc; padding: 15px; border-radius: 8px; width: 300px; }
+  button { padding: 5px 10px; margin-top: 5px; cursor: pointer; }
+  .events { margin-top: 20px; display: flex; flex-wrap: wrap; gap: 15px; }
+  .event-box { border: 1px solid #aaa; padding: 10px; border-radius: 6px; width: 250px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>EventHub - Area Admin</h1>
+  <div>
+    <button id="logoutBtn">Logout</button>
+    <button onclick="window.location.href='/register-admin.html'">Registra nuovo Admin</button>
+  </div>
+</header>
+
+<div class="dashboard">
+  <div class="box">
+    <h3>Eventi in attesa</h3>
+    <div id="pendingEvents"></div>
+  </div>
+
+  <div class="box">
+    <h3>Tutti gli eventi</h3>
+    <div id="allEvents"></div>
+  </div>
+
+  <div class="box">
+    <h3>Eventi pubblici</h3>
+    <div id="publicEvents"></div>
+  </div>
+
+  <div class="box">
+    <h3>Utenti</h3>
+    <div id="allUsers"></div>
+  </div>
+</div>
+
+<script>
+const token = localStorage.getItem('token'); // assumendo che il token sia salvato al login
+
+// Funzione per fare fetch con auth
+async function fetchAuth(url, options = {}) {
+  options.headers = { ...options.headers, Authorization: `Bearer ${token}` };
+  const res = await fetch(url, options);
+  return res.json();
+}
+
+// Logout
+document.getElementById('logoutBtn').addEventListener('click', () => {
+  localStorage.removeItem('token');
+  window.location.href = '/login.html';
+});
+
+// Carica eventi in attesa
+async function loadPendingEvents() {
+  const container = document.getElementById('pendingEvents');
+  const events = await fetchAuth('/api/admin/events/pending');
+  container.innerHTML = '';
+  events.forEach(ev => {
+    const div = document.createElement('div');
+    div.className = 'event-box';
+    div.innerHTML = `
+      <strong>${ev.title}</strong><br>
+      ${ev.category} - ${ev.location} - ${new Date(ev.date).toLocaleDateString()}<br>
+      <button onclick="approveEvent(${ev.id})">Approva</button>
+      <button onclick="rejectEvent(${ev.id})">Rifiuta</button>
+    `;
+    container.appendChild(div);
+  });
+}
+
+// Approvare / rifiutare eventi
+async function approveEvent(id) {
+  await fetchAuth(`/api/admin/events/${id}/approve`, { method: 'PUT' });
+  loadPendingEvents();
+  loadAllEvents();
+}
+async function rejectEvent(id) {
+  await fetchAuth(`/api/admin/events/${id}/reject`, { method: 'PUT' });
+  loadPendingEvents();
+  loadAllEvents();
+}
+
+// Carica tutti gli eventi (modifica / elimina)
+async function loadAllEvents() {
+  const container = document.getElementById('allEvents');
+  const events = await fetchAuth('/api/admin/events/all');
+  container.innerHTML = '';
+  events.forEach(ev => {
+    const div = document.createElement('div');
+    div.className = 'event-box';
+    div.innerHTML = `
+      <strong>${ev.title}</strong><br>
+      ${ev.category} - ${ev.location} - ${new Date(ev.date).toLocaleDateString()}<br>
+      <button onclick="window.location.href='/edit-event.html?id=${ev.id}'">Modifica</button>
+      <button onclick="deleteEvent(${ev.id})">Elimina</button>
+    `;
+    container.appendChild(div);
+  });
+}
+
+async function deleteEvent(id) {
+  await fetchAuth(`/api/events/${id}`, { method: 'DELETE' });
+  loadAllEvents();
+  loadPendingEvents();
+}
+
+// Carica eventi pubblici (come utenti)
+async function loadPublicEvents() {
+  const container = document.getElementById('publicEvents');
+  const events = await fetch('/api/events').then(r => r.json());
+  container.innerHTML = '';
+  events.forEach(ev => {
+    const div = document.createElement('div');
+    div.className = 'event-box';
+    div.innerHTML = `<strong>${ev.title}</strong><br>${ev.category} - ${ev.location} - ${new Date(ev.date).toLocaleDateString()}`;
+    container.appendChild(div);
+  });
+}
+
+// Carica utenti
+async function loadUsers() {
+  const container = document.getElementById('allUsers');
+  const users = await fetchAuth('/api/admin/users');
+  container.innerHTML = '';
+  users.forEach(u => {
+    const div = document.createElement('div');
+    div.className = 'event-box';
+    div.innerHTML = `
+      <strong>${u.name}</strong> (${u.role})<br>${u.email}<br>
+      Stato: ${u.isActive ? 'Attivo' : 'Bloccato'}<br>
+      <button onclick="blockUser(${u.id})">Blocca</button>
+      <button onclick="unblockUser(${u.id})">Sblocca</button>
+    `;
+    container.appendChild(div);
+  });
+}
+
+async function blockUser(id) { await fetchAuth(`/api/admin/users/${id}/block`, { method: 'PUT' }); loadUsers(); }
+async function unblockUser(id) { await fetchAuth(`/api/admin/users/${id}/unblock`, { method: 'PUT' }); loadUsers(); }
+
+// Carica tutto all’avvio
+loadPendingEvents();
+loadAllEvents();
+loadPublicEvents();
+loadUsers();
+</script>
+</body>
+</html>

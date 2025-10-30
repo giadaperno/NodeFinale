@@ -86,4 +86,27 @@ export const getAllUsers = async (req, res) => {
   }
 };
 
+/**
+ * Eventi in attesa di approvazione
+ */
+export const getPendingEvents = async (req, res) => {
+  try {
+    const events = await Event.findAll({ where: { isApproved: false } });
+    res.json(events);
+  } catch (error) {
+    res.status(500).json({ message: "Errore server", error: error.message });
+  }
+};
+
+/**
+ * Tutti gli eventi (admin può modificare o cancellare)
+ */
+export const getAllEvents = async (req, res) => {
+  try {
+    const events = await Event.findAll();
+    res.json(events);
+  } catch (error) {
+    res.status(500).json({ message: "Errore server", error: error.message });
+  }
+};
 

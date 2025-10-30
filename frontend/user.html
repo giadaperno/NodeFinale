@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EventHub - Area Personale</title>
+<style>
+  body { font-family: Arial, sans-serif; margin: 20px; }
+  header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+  h1 { margin: 0; }
+  .dashboard { display: flex; gap: 30px; }
+  .box { border: 1px solid #ccc; padding: 15px; border-radius: 8px; width: 300px; }
+  button { padding: 5px 10px; margin-top: 5px; cursor: pointer; }
+  .events { margin-top: 20px; display: flex; flex-wrap: wrap; gap: 15px; }
+  .event-box { border: 1px solid #aaa; padding: 10px; border-radius: 6px; width: 250px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>EventHub - Area Personale</h1>
+  <button id="logoutBtn">Logout</button>
+</header>
+
+<div class="dashboard">
+  <div class="box">
+    <h3>I miei eventi creati</h3>
+    <div id="myCreatedEvents"></div>
+    <button onclick="window.location.href='/create-event.html'">Crea nuovo evento</button>
+    <button onclick="window.location.href='/edit-event.html'">Modifica evento</button>
+  </div>
+  
+  <div class="box">
+    <h3>Eventi a cui sono iscritto</h3>
+    <div id="myRegisteredEvents"></div>
+  </div>
+</div>
+
+<h2>Eventi pubblici</h2>
+<div class="events" id="eventsContainer"></div>
+
+<script src="/js/user.js"></script>
+</body>
+</html>

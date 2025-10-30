@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EventHub - Eventi pubblici</title>
+<style>
+  body { font-family: Arial, sans-serif; margin: 20px; }
+  header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+  header h1 { margin: 0; }
+  .filters input, .filters select { margin-right: 10px; padding: 5px; }
+  .filters button { padding: 5px 10px; margin-top: 5px; }
+  .events { display: flex; flex-wrap: wrap; gap: 15px; }
+  .event-box { border: 1px solid #ccc; padding: 15px; width: 250px; border-radius: 8px; }
+  .event-box h3 { margin: 0 0 10px 0; }
+  button { padding: 5px 10px; margin-top: 5px; cursor: pointer; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>EventHub</h1>
+  <div>
+    <button onclick="window.location.href='/login.html'">Login</button>
+    <button onclick="window.location.href='/register.html'">Registrati</button>
+  </div>
+</header>
+
+<div class="filters">
+  <input type="text" id="categoryFilter" placeholder="Categoria">
+  <input type="text" id="locationFilter" placeholder="Luogo">
+  <input type="date" id="dateFilter">
+  <button id="applyFilters">Applica Filtri</button>
+  <button id="clearFilters">Reset Filtri</button>
+</div>
+
+<h2>Eventi pubblici</h2>
+<div class="events" id="eventsContainer"></div>
+
+<script>
+const eventsContainer = document.getElementById('eventsContainer');
+
+// Carica eventi dal backend con filtri
+async function loadEvents(filters = {}) {
+  const query = new URLSearchParams(filters).toString();
+  const res = await fetch(`/api/events?${query}`);
+  const events = await res.json();
+
+  eventsContainer.innerHTML = '';
+  events.forEach(event => {
+    const box = document.createElement('div');
+    box.className = 'event-box';
+    box.innerHTML = `
+      <h3>${event.title}</h3>
+      <p>${event.description}</p>
+      <p><strong>Categoria:</strong> ${event.category}</p>
+      <p><strong>Luogo:</strong> ${event.location}</p>
+      <p><strong>Data:</strong> ${new Date(event.date).toLocaleDateString()}</p>
+      <button onclick="registerEvent(${event.id}, '${event.title}')">Iscriviti</button>
+      <button onclick="cancelEvent(${event.id}, '${event.title}')">Annulla iscrizione</button>
+    `;
+    eventsContainer.appendChild(box);
+  });
+}
+
+// Iscrizione a un evento
+async function registerEvent(eventId, title) {
+  const token = localStorage.getItem('token');
+  if (!token) {
+    // Se non loggato, vai al login
+    window.location.href = '/login.html';
+    return;
+  }
+
+  try {
+    const res = await fetch('/api/registrations', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+      body: JSON.stringify({ eventId })
+    });
+    const data = await res.json();
+    alert(data.message || `Iscrizione all'evento "${title}" avvenuta con successo su EventHub!`);
+  } catch (err) {
+    console.error(err);
+    alert('Errore durante l\'iscrizione su EventHub');
+  }
+}
+
+// Annulla iscrizione a un evento
+async function cancelEvent(eventId, title) {
+  const token = localStorage.getItem('token');
+  if (!token) {
+    // Se non loggato, vai al login
+    window.location.href = '/login.html';
+    return;
+  }
+
+  try {
+    const res = await fetch('/api/registrations', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+      body: JSON.stringify({ eventId })
+    });
+    const data = await res.json();
+    alert(data.message || `Iscrizione all'evento "${title}" annullata su EventHub!`);
+  } catch (err) {
+    console.error(err);
+    alert('Errore durante l\'annullamento su EventHub');
+  }
+}
+
+// Filtri
+document.getElementById('applyFilters').addEventListener('click', () => {
+  const filters = {
+    category: document.getElementById('categoryFilter').value,
+    location: document.getElementById('locationFilter').value,
+    date: document.getElementById('dateFilter').value
+  };
+  loadEvents(filters);
+});
+
+document.getElementById('clearFilters').addEventListener('click', () => {
+  document.getElementById('categoryFilter').value = '';
+  document.getElementById('locationFilter').value = '';
+  document.getElementById('dateFilter').value = '';
+  loadEvents();
+});
+
+// Carica eventi all'avvio
+loadEvents();
+</script>
+
+</body>
+</html>
