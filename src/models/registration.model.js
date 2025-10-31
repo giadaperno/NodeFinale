@@ -19,4 +19,7 @@ const Registration = sequelize.define("Registration", {
 User.belongsToMany(Event, { through: Registration, as: "registeredEvents" });
 Event.belongsToMany(User, { through: Registration, as: "participants" });
 
+// Relazione esplicita per l'inclusione diretta di Event nel modello Registration
+Registration.belongsTo(Event, { foreignKey: "EventId" });
+
 export default Registration;

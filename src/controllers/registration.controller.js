@@ -27,16 +27,39 @@ export const registerToEvent = async (req, res) => {
 // Annulla iscrizione a un evento
 export const cancelRegistration = async (req, res) => {
   const userId = req.user.id;
-  const { eventId } = req.params;
+  const { eventId } = req.params; // ora prende dai params
 
   try {
-    // Cerca la registrazione
-    const registration = await Registration.findOne({ where: { UserId: userId, EventId: eventId } });
-    if (!registration) return res.status(404).json({ message: "Registrazione non trovata" });
+    const registration = await Registration.findOne({
+      where: { UserId: userId, EventId: eventId }
+    });
 
-    // Elimina la registrazione
+    if (!registration)
+      return res.status(404).json({ message: "Registrazione non trovata" });
+
     await registration.destroy();
     res.json({ message: "Iscrizione annullata con successo" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Errore server", error: error.message });
+  }
+};
+
+// Ottieni tutti gli eventi a cui l'utente è iscritto
+export const getUserRegisteredEvents = async (req, res) => {
+  const userId = req.user.id;
+
+  try {
+    const registrations = await Registration.findAll({
+      where: { UserId: userId },
+      include: [{
+        model: Event,
+        attributes: ['id', 'title', 'description', 'date', 'location', 'category']
+      }]
+    });
+
+    const events = registrations.map(reg => reg.Event);
+    res.json(events);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Errore server", error: error.message });

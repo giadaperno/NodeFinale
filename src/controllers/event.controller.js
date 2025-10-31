@@ -1,6 +1,7 @@
 import { Op } from "sequelize";
-import EventRegistration from "../models/eventRegistration.model.js"; 
+import EventRegistration from "../models/eventRegistration.model.js";
 import Event from "../models/event.model.js";
+import Registration from "../models/registration.model.js";
 
 // Crea evento
 export const createEvent = async (req, res) => {
@@ -130,13 +131,11 @@ export const getUserCreatedEvents = async (req, res) => {
 export const getUserRegisteredEvents = async (req, res) => {
   try {
     const userId = req.user.id;
-
     const registrations = await EventRegistration.findAll({
       where: { UserId: userId },
-      include: [{ model: Event, as: "event" }],
+      include: [{ model: Event, as: "event" }], // qui serve "as"
     });
-
-    const events = registrations.map((r) => r.event);
+    const events = registrations.map(r => r.event); // r.event corrisponde all'alias
     res.json(events);
   } catch (error) {
     console.error("Errore getUserRegisteredEvents:", error);
