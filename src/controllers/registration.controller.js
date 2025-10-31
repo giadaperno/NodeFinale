@@ -27,7 +27,7 @@ export const registerToEvent = async (req, res) => {
 // Annulla iscrizione a un evento
 export const cancelRegistration = async (req, res) => {
   const userId = req.user.id;
-  const { eventId } = req.body;
+  const { eventId } = req.params;
 
   try {
     // Cerca la registrazione

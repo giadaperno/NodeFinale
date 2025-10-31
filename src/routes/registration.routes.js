@@ -7,6 +7,7 @@ const router = express.Router();
 // Iscrizione a un evento
 router.post("/", verifyToken, registerToEvent);
 
-// Annulla iscrizione a un evento
-router.delete("/", verifyToken, cancelRegistration);
+// Annulla iscrizione a un evento (ora con params)
+router.delete("/:eventId", verifyToken, cancelRegistration);
+
 export default router;

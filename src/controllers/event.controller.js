@@ -1,4 +1,5 @@
 import { Op } from "sequelize";
+import EventRegistration from "../models/eventRegistration.model.js"; 
 import Event from "../models/event.model.js";
 
 // Crea evento
@@ -107,5 +108,38 @@ export const deleteEvent = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Errore server", error: error.message });
+  }
+};
+
+// Eventi creati dall'utente autenticato
+export const getUserCreatedEvents = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const events = await Event.findAll({
+      where: { UserId: userId },
+      order: [["date", "DESC"]],
+    });
+    res.json(events);
+  } catch (error) {
+    console.error("Errore getUserCreatedEvents:", error);
+    res.status(500).json({ message: "Errore nel recupero eventi creati" });
+  }
+};
+
+// Eventi a cui l'utente autenticato si è registrato
+export const getUserRegisteredEvents = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const registrations = await EventRegistration.findAll({
+      where: { UserId: userId },
+      include: [{ model: Event, as: "event" }],
+    });
+
+    const events = registrations.map((r) => r.event);
+    res.json(events);
+  } catch (error) {
+    console.error("Errore getUserRegisteredEvents:", error);
+    res.status(500).json({ message: "Errore nel recupero eventi iscritti" });
   }
 };

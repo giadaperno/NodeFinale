@@ -1,6 +1,10 @@
 import sequelize from "./src/config/db.js";
 import app from "./src/app.js";
 
+import "./src/models/user.model.js";
+import "./src/models/event.model.js";
+import "./src/models/eventRegistration.model.js";
+
 const PORT = process.env.PORT || 5000;
 
 const startServer = async () => {
