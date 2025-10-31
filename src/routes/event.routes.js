@@ -18,8 +18,11 @@ router.post("/", verifyToken, createEvent);
 // Lista tutti gli eventi approvati (pubblico)
 router.get("/", listEvents);
 
-// Dettaglio di un singolo evento
-router.get("/:id", getEventById);
+// Eventi creati dall'utente autenticato
+router.get("/my-created", verifyToken, getUserCreatedEvents);
+
+// Eventi a cui l'utente autenticato si è registrato
+router.get("/my-registered", verifyToken, getUserRegisteredEvents);
 
 // Modifica un evento (solo creatore o admin)
 router.put("/:id", verifyToken, updateEvent);
@@ -27,9 +30,7 @@ router.put("/:id", verifyToken, updateEvent);
 // Cancella un evento (solo creatore o admin)
 router.delete("/:id", verifyToken, deleteEvent);
 
-// Eventi creati dall'utente autenticato
-router.get("/my-created", verifyToken, getUserCreatedEvents);
+// Dettaglio di un singolo evento (alla fine!)
+router.get("/:id", getEventById);
 
-//Eventi a cui l'utente autenticato si è registrato
-router.get("/my-registered", verifyToken, getUserRegisteredEvents);
 export default router;
