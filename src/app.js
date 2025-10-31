@@ -8,6 +8,7 @@ import authRoutes from "./routes/auth.routes.js";
 import eventRoutes from "./routes/event.routes.js";
 import registrationRoutes from "./routes/registration.routes.js";
 import adminRoutes from "./routes/admin.routes.js";
+import chatRoutes from "./routes/chat.routes.js";
 dotenv.config();
 
 const app = express();
@@ -24,10 +25,11 @@ app.use("/api/auth", authRoutes);
 app.use("/api/events", eventRoutes);
 app.use("/api/registrations", registrationRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/chat", chatRoutes);
 
 // Rotta di fallback (opzionale) per la homepage
 app.get("/", (req, res) => {
-app.use(express.static(path.join(__dirname, '../frontend')));
+	res.sendFile(path.join(process.cwd(), 'frontend', 'index.html'));
 });
 
 export default app;

@@ -30,6 +30,7 @@ async function loadPublicEvents() {
         <p><strong>Data:</strong> ${new Date(event.date).toLocaleDateString()}</p>
         <button onclick="registerEvent(${event.id}, '${event.title}')">Iscriviti</button>
         <button onclick="cancelRegistration(${event.id}, '${event.title}')">Annulla iscrizione</button>
+        <button onclick="openEventChat(${event.id}, '${event.title}')">Chat</button>
       `;
       container.appendChild(box);
     });
@@ -131,6 +132,138 @@ async function cancelRegistration(eventId) {
     alert(`⚠️ Errore: ${err.message}`);
   }
 }
+
+// 🔹 Chat functions
+let socket;
+let currentEventId;
+
+function connectToSocket() {
+  if (!socket) {
+    // Passiamo il token nel handshake per l'autenticazione lato server
+    socket = io({ auth: { token } });
+
+    socket.on('connect', () => {
+      console.log('Socket connesso:', socket.id);
+    });
+
+    socket.on('connect_error', (err) => {
+      console.error('Errore connessione socket:', err.message);
+      alert('Impossibile connettersi alla chat: ' + err.message);
+    });
+
+    socket.on('new-message', (message) => {
+      if (message.EventId === currentEventId) {
+        appendMessage(message);
+      }
+    });
+  }
+}
+
+async function openEventChat(eventId, eventTitle) {
+  currentEventId = eventId;
+  connectToSocket();
+  
+  // Join the event's chat room
+  socket.emit('join-event', eventId);
+  
+  // Create chat modal if it doesn't exist
+  let chatModal = document.getElementById('chatModal');
+  if (!chatModal) {
+    chatModal = document.createElement('div');
+    chatModal.id = 'chatModal';
+    chatModal.className = 'chat-modal';
+    chatModal.innerHTML = `
+      <div class="chat-content">
+        <div class="chat-header">
+          <h3>Chat: <span id="chatEventTitle"></span></h3>
+          <button onclick="closeChatModal()">✖</button>
+        </div>
+        <div class="chat-messages" id="chatMessages"></div>
+        <div class="chat-input">
+          <input type="text" id="messageInput" placeholder="Scrivi un messaggio...">
+          <button onclick="sendChatMessage()">Invia</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(chatModal);
+  }
+  
+  document.getElementById('chatEventTitle').textContent = eventTitle;
+  chatModal.style.display = 'block';
+  
+  // Load existing messages
+  await loadChatMessages(eventId);
+}
+
+function closeChatModal() {
+  const chatModal = document.getElementById('chatModal');
+  if (chatModal) {
+    chatModal.style.display = 'none';
+  }
+  if (socket && currentEventId) socket.emit('leave-event', currentEventId);
+  currentEventId = null;
+}
+
+async function loadChatMessages(eventId) {
+  try {
+    const res = await fetch(`/api/chat/${eventId}`, { headers });
+    const messages = await res.json();
+    
+    const chatMessages = document.getElementById('chatMessages');
+    chatMessages.innerHTML = '';
+    messages.forEach(message => appendMessage(message));
+    
+    // Scroll to bottom
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  } catch (err) {
+    console.error('Errore nel caricamento dei messaggi:', err);
+  }
+}
+
+function appendMessage(message) {
+  const chatMessages = document.getElementById('chatMessages');
+  const messageDiv = document.createElement('div');
+  messageDiv.className = 'chat-message';
+  messageDiv.innerHTML = `
+    <strong>${message.User.name}</strong>: ${message.message}
+    <small>${new Date(message.timestamp).toLocaleTimeString()}</small>
+  `;
+  chatMessages.appendChild(messageDiv);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+async function sendChatMessage() {
+  const input = document.getElementById('messageInput');
+  const message = input.value.trim();
+  
+  if (!message) return;
+  
+  try {
+    const res = await fetch('/api/chat', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({
+        eventId: currentEventId,
+        message
+      })
+    });
+    
+    if (!res.ok) throw new Error('Errore nell\'invio del messaggio');
+    input.value = '';
+  } catch (err) {
+    console.error('Errore nell\'invio del messaggio:', err);
+    alert('Errore nell\'invio del messaggio');
+  }
+}
+
+// Add event listener for message input
+document.addEventListener('DOMContentLoaded', () => {
+  document.body.addEventListener('keypress', (e) => {
+    if (e.target.id === 'messageInput' && e.key === 'Enter') {
+      sendChatMessage();
+    }
+  });
+});
 
 // 🔹 Inizializza dashboard
 loadPublicEvents();
