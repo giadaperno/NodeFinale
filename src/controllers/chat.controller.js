@@ -24,19 +24,21 @@ export const sendMessage = async (req, res) => {
       EventId: eventId
     });
 
+    // Recupera il messaggio creato con i dati utente inclusi
+    const created = await Chat.findByPk(chat.id, {
+      include: [{ model: User, attributes: ["id", "name"] }]
+    });
+
     // Emetti l'evento socket.io per aggiornamento real-time
     const io = getIO();
     console.log('sendMessage: io instance present?', !!io);
     if (io) {
-      io.to(`event-${eventId}`).emit('new-message', {
-        ...chat.toJSON(),
-        User: { id: req.user.id, name: req.user.name }
-      });
+      io.to(`event-${eventId}`).emit('new-message', created.toJSON());
     } else {
       console.warn('Socket.io non inizializzato, evento non emesso');
     }
 
-    res.json(chat);
+    res.json(created);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Errore server", error: error.message });
