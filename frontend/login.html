@@ -4,36 +4,36 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>EventHub - Login</title>
-<style>
-  body { font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background: #f5f5f5; }
-  .login-container { background: #fff; padding: 30px; border-radius: 8px; width: 350px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-  h2 { margin: 0 0 5px 0; }
-  p.subtitle { margin: 0 0 20px 0; color: #555; font-size: 0.9em; }
-  input { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; }
-  button { width: 100%; padding: 10px; background: #007bff; color: #fff; border: none; border-radius: 4px; cursor: pointer; margin-bottom: 10px; }
-  button:hover { background: #0056b3; }
-  .link { text-align: center; margin-top: 10px; font-size: 0.9em; }
-  .link a { color: #007bff; text-decoration: none; }
-  .link a:hover { text-decoration: underline; }
-</style>
+<link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
 
-<div class="login-container">
-  <h2>Accedi</h2>
-  <p class="subtitle">Avrai accesso ai tuoi eventi e al mondo EventHub</p>
+<div class="hero-section" style="height: 200px; margin-bottom: 0;">
+  <h1>Bentornato su EventHub</h1>
+  <p>Accedi per gestire i tuoi eventi e partecipare alla community</p>
+</div>
+
+<div class="auth-container">
+  <div style="text-align: center; margin-bottom: 30px;">
+    <i class="fas fa-user-circle" style="font-size: 3rem; color: var(--primary);"></i>
+  </div>
 
   <input type="email" id="email" placeholder="Email">
   <input type="password" id="password" placeholder="Password">
   
-  <div class="link"><a href="/forgot-password.html">Password dimenticata?</a></div>
+  <div class="link" style="margin-bottom: 20px;">
+    <a href="/forgot-password.html" style="color: var(--primary);">Password dimenticata?</a>
+  </div>
   
   <button id="loginBtn">Entra</button>
-  <button id="homeBtn" style="background:#6c757d;">Home</button>
+  <button id="homeBtn" class="secondary">Torna alla home</button>
 
-  <div class="link">Non hai un account? <a href="/register.html">Registrati</a></div>
+  <div class="link" style="margin-top: 20px;">
+    Non hai un account? <a href="/register.html" style="color: var(--primary);">Registrati</a>
+  </div>
   
-  <div id="message" style="color:red; margin-top:10px;"></div>
+  <div id="message" style="color: #E53E3E; margin-top: 15px; text-align: center;"></div>
 </div>
 
 <script>

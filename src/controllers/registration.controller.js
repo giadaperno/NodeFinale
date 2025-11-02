@@ -74,8 +74,8 @@ export const getUserRegisteredEvents = async (req, res) => {
     const registrations = await Registration.findAll({
       where: { UserId: userId },
       include: [{
-        model: Event,
-        attributes: ['id', 'title', 'description', 'date', 'location', 'category']
+      model: Event,
+      attributes: ['id', 'title', 'description', 'date', 'location', 'category', 'image', 'capacity']
       }]
     });
 

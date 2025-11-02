@@ -15,8 +15,8 @@ const startServer = async () => {
     await sequelize.authenticate();
     console.log("Connessione a MySQL riuscita!");
 
-    // Sincronizza i modelli: crea le tabelle se non esistono
-    await sequelize.sync({ alter: true }); // alter: aggiorna le tabelle senza cancellare i dati
+    // Sincronizza i modelli con force: false per evitare problemi con gli indici
+    await sequelize.sync({ force: false }); 
     console.log("Modelli sincronizzati con il database");
 
     const httpServer = createServer(app);

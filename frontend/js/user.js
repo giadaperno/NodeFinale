@@ -71,16 +71,56 @@ async function loadPublicEvents() {
     container.innerHTML = "";
 
     events.forEach(event => {
+      const eventDate = new Date(event.date);
+      const isUpcoming = eventDate > new Date();
+      const registeredCount = event.registrations?.length || 0;
+      const capacityPercentage = (registeredCount / event.capacity) * 100;
+
       const box = document.createElement("div");
       box.className = "event-box";
       box.innerHTML = `
-        <h4>${event.title}</h4>
-        <p>${event.description}</p>
-        <p><strong>Luogo:</strong> ${event.location}</p>
-        <p><strong>Data:</strong> ${new Date(event.date).toLocaleDateString()}</p>
-        <button onclick="registerEvent(${event.id}, '${event.title}')">Iscriviti</button>
-        <button onclick="cancelRegistration(${event.id}, '${event.title}')">Annulla iscrizione</button>
-        <button onclick="openEventChat(${event.id}, '${event.title}')">Chat</button>
+        <img src="${event.image || '/assets/images/defaults/event-default.jpg'}" alt="${event.title}" class="event-image">
+        <div class="event-content">
+          <span class="category-badge">${event.category || 'Generale'}</span>
+          <h3 class="event-title">${event.title}</h3>
+          
+          <div class="event-meta">
+            <span><i class="fas fa-map-marker-alt"></i> ${event.location}</span>
+            <span><i class="fas fa-calendar"></i> ${eventDate.toLocaleDateString('it-IT', { 
+              weekday: 'long', 
+              year: 'numeric', 
+              month: 'long', 
+              day: 'numeric'
+            })}</span>
+            <span><i class="fas fa-clock"></i> ${eventDate.toLocaleTimeString('it-IT', { 
+              hour: '2-digit', 
+              minute: '2-digit'
+            })}</span>
+          </div>
+
+          <p class="event-description">${event.description || 'Nessuna descrizione disponibile'}</p>
+
+          <div class="capacity-indicator">
+            <span><i class="fas fa-users"></i> ${registeredCount}/${event.capacity} partecipanti</span>
+            <div class="capacity-bar">
+              <div class="capacity-fill" style="width: ${capacityPercentage}%"></div>
+            </div>
+          </div>
+
+          <div class="event-actions">
+            ${isUpcoming ? `
+              <button onclick="registerEvent(${event.id}, '${event.title.replace(/'/g, "\\'")}')" class="primary">
+                <i class="fas fa-check"></i> Iscriviti
+              </button>
+              <button onclick="cancelRegistration(${event.id})" class="secondary">
+                <i class="fas fa-times"></i> Annulla
+              </button>
+              <button onclick="openEventChat(${event.id}, '${event.title.replace(/'/g, "\\'")}')" class="secondary">
+                <i class="fas fa-comments"></i> Chat
+              </button>
+            ` : '<span class="badge">Evento passato</span>'}
+          </div>
+        </div>
       `;
       container.appendChild(box);
     });
@@ -96,14 +136,47 @@ async function loadMyCreatedEvents() {
     const events = await res.json();
     const container = document.getElementById("myCreatedEvents");
     container.innerHTML = events.length
-      ? events.map(e => `
-          <div class="event-box">
-            <h4>${e.title}</h4>
-            <p>${new Date(e.date).toLocaleDateString()}</p>
-            <button onclick="editEvent(${e.id})">Modifica</button>
-            <button onclick="deleteEvent(${e.id})">Elimina</button>
-          </div>
-        `).join("")
+      ? events.map(e => {
+          const eventDate = new Date(e.date);
+          const registeredCount = e.registrations?.length || 0;
+          const capacityPercentage = (registeredCount / e.capacity) * 100;
+          
+          return `
+            <div class="event-box">
+              <img src="${e.image || '/assets/images/defaults/event-default.jpg'}" alt="${e.title}" class="event-image">
+              <div class="event-content">
+                <span class="category-badge">${e.category || 'Generale'}</span>
+                <h3 class="event-title">${e.title}</h3>
+                
+                <div class="event-meta">
+                  <span><i class="fas fa-map-marker-alt"></i> ${e.location}</span>
+                  <span><i class="fas fa-calendar"></i> ${eventDate.toLocaleDateString('it-IT', { 
+                    weekday: 'long', 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric'
+                  })}</span>
+                </div>
+
+                <div class="capacity-indicator">
+                  <span><i class="fas fa-users"></i> ${registeredCount}/${e.capacity} partecipanti</span>
+                  <div class="capacity-bar">
+                    <div class="capacity-fill" style="width: ${capacityPercentage}%"></div>
+                  </div>
+                </div>
+
+                <div class="event-actions">
+                  <button onclick="editEvent(${e.id})" class="primary">
+                    <i class="fas fa-edit"></i> Modifica
+                  </button>
+                  <button onclick="deleteEvent(${e.id})" class="secondary">
+                    <i class="fas fa-trash"></i> Elimina
+                  </button>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join("")
       : "<p>Nessun evento creato.</p>";
   } catch (err) {
     console.error("Errore nel caricamento dei tuoi eventi:", err);
@@ -117,15 +190,52 @@ async function loadMyRegisteredEvents() {
     const events = await res.json();
     const container = document.getElementById("myRegisteredEvents");
     container.innerHTML = events.length
-      ? events.map(e => `
-          <div class="event-box">
-            <h4>${e.title}</h4>
-            <p>${e.description}</p>
-            <p><strong>Luogo:</strong> ${e.location}</p>
-            <p><strong>Data:</strong> ${new Date(e.date).toLocaleDateString()}</p>
-            <button onclick="cancelRegistration(${e.id})">Annulla iscrizione</button>
-          </div>
-        `).join("")
+      ? events.map(e => {
+          const eventDate = new Date(e.date);
+          const isUpcoming = eventDate > new Date();
+          const registeredCount = e.registrations?.length || 0;
+          const capacityPercentage = (registeredCount / e.capacity) * 100;
+          
+          return `
+            <div class="event-box">
+              <img src="${e.image || '/assets/images/defaults/event-default.jpg'}" alt="${e.title}" class="event-image">
+              <div class="event-content">
+                <span class="category-badge">${e.category || 'Generale'}</span>
+                <h3 class="event-title">${e.title}</h3>
+                
+                <div class="event-meta">
+                  <span><i class="fas fa-map-marker-alt"></i> ${e.location}</span>
+                  <span><i class="fas fa-calendar"></i> ${eventDate.toLocaleDateString('it-IT', { 
+                    weekday: 'long', 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric'
+                  })}</span>
+                </div>
+
+                <p class="event-description">${e.description || 'Nessuna descrizione disponibile'}</p>
+
+                <div class="capacity-indicator">
+                  <span><i class="fas fa-users"></i> ${registeredCount}/${e.capacity} partecipanti</span>
+                  <div class="capacity-bar">
+                    <div class="capacity-fill" style="width: ${capacityPercentage}%"></div>
+                  </div>
+                </div>
+
+                <div class="event-actions">
+                  ${isUpcoming ? `
+                    <button onclick="openEventChat(${e.id}, '${e.title.replace(/'/g, "\\'")}')" class="primary">
+                      <i class="fas fa-comments"></i> Chat
+                    </button>
+                    <button onclick="cancelRegistration(${e.id})" class="secondary">
+                      <i class="fas fa-times"></i> Annulla iscrizione
+                    </button>
+                  ` : '<span class="badge">Evento passato</span>'}
+                </div>
+              </div>
+            </div>
+          `;
+        }).join("")
       : "<p>Nessuna iscrizione trovata.</p>";
   } catch (err) {
     console.error("Errore nel caricamento iscrizioni:", err);

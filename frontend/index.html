@@ -3,39 +3,50 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>EventHub - Eventi pubblici</title>
-<style>
-  body { font-family: Arial, sans-serif; margin: 20px; }
-  header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-  header h1 { margin: 0; }
-  .filters input, .filters select { margin-right: 10px; padding: 5px; }
-  .filters button { padding: 5px 10px; margin-top: 5px; }
-  .events { display: flex; flex-wrap: wrap; gap: 15px; }
-  .event-box { border: 1px solid #ccc; padding: 15px; width: 250px; border-radius: 8px; }
-  .event-box h3 { margin: 0 0 10px 0; }
-  button { padding: 5px 10px; margin-top: 5px; cursor: pointer; }
-</style>
+<title>EventHub - La tua piattaforma per eventi</title>
+<link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
 
-<header>
+<div class="hero-section">
   <h1>EventHub</h1>
-  <div>
-    <button onclick="window.location.href='/login.html'">Login</button>
-    <button onclick="window.location.href='/register.html'">Registrati</button>
+  <p>Scopri, partecipa e organizza eventi nella tua città. La piattaforma che connette persone e esperienze.</p>
+  <div class="cta-buttons">
+    <a href="/login.html" class="cta-primary">Accedi</a>
+    <a href="/register.html" class="cta-secondary">Registrati</a>
   </div>
-</header>
-
-<div class="filters">
-  <input type="text" id="categoryFilter" placeholder="Categoria">
-  <input type="text" id="locationFilter" placeholder="Luogo">
-  <input type="date" id="dateFilter">
-  <button id="applyFilters">Applica Filtri</button>
-  <button id="clearFilters">Reset Filtri</button>
 </div>
 
-<h2>Eventi pubblici</h2>
-<div class="events" id="eventsContainer"></div>
+<div class="features-section">
+  <div class="feature-card">
+    <i class="fas fa-calendar-alt"></i>
+    <h3>Eventi per tutti</h3>
+    <p>Scopri eventi di ogni tipo: concerti, workshop, conferenze, sport e molto altro.</p>
+  </div>
+  <div class="feature-card">
+    <i class="fas fa-users"></i>
+    <h3>Community attiva</h3>
+    <p>Unisciti a una community di persone che condividono i tuoi stessi interessi.</p>
+  </div>
+  <div class="feature-card">
+    <i class="fas fa-star"></i>
+    <h3>Organizza eventi</h3>
+    <p>Crea e gestisci i tuoi eventi in modo semplice e professionale.</p>
+  </div>
+</div>
+
+<div class="box" style="margin: 40px auto; max-width: 1200px;">
+  <h2>Eventi in evidenza</h2>
+  <div class="filters">
+    <input type="text" id="categoryFilter" placeholder="Categoria">
+    <input type="text" id="locationFilter" placeholder="Luogo">
+    <input type="date" id="dateFilter">
+    <button id="applyFilters">Applica Filtri</button>
+    <button id="clearFilters" class="secondary">Reset Filtri</button>
+  </div>
+  <div class="events" id="eventsContainer"></div>
+</div>
 
 <script>
 const eventsContainer = document.getElementById('eventsContainer');
