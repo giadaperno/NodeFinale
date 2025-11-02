@@ -13,6 +13,23 @@
   button { padding: 5px 10px; margin-top: 5px; cursor: pointer; }
   .events { margin-top: 20px; display: flex; flex-wrap: wrap; gap: 15px; }
   .event-box { border: 1px solid #aaa; padding: 10px; border-radius: 6px; width: 250px; }
+  /* Stili per le notifiche toast */
+  #notificationContainer {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    z-index: 2000;
+  }
+  .toast-notification {
+    background: #333;
+    color: white;
+    padding: 8px 12px;
+    margin-top: 8px;
+    border-radius: 6px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    opacity: 1;
+    transition: opacity 0.3s;
+  }
 </style>
 </head>
 <body>
@@ -47,8 +64,59 @@
   </div>
 </div>
 
+<script src="/socket.io/socket.io.js"></script>
 <script>
-const token = localStorage.getItem('token'); // assumendo che il token sia salvato al login
+const token = localStorage.getItem('token');
+if (!token) window.location.href = '/login.html';
+
+// Verifica che sia un admin
+const payload = JSON.parse(atob(token.split('.')[1]));
+if (payload.role !== 'admin') {
+  window.location.href = '/user.html';
+}
+
+// Inizializzazione Socket.IO
+const socket = io({ 
+  auth: { token },
+  transports: ['websocket'],
+  timeout: 5000
+});
+
+socket.on('connect', () => {
+  console.log('Socket admin connesso:', socket.id);
+});
+
+socket.on('connect_error', (err) => {
+  console.error('Errore connessione socket:', err.message);
+});
+
+// Notifiche per eventi segnalati
+socket.on('event-reported', (payload) => {
+  console.log('Evento segnalato:', payload);
+  showNotification(`⚠️ Segnalazione: "${payload.event?.title || 'Evento #' + payload.event?.id}" da ${payload.reporter?.name || 'Utente'}`);
+  // Ricarica la lista eventi per mostrare eventuali aggiornamenti
+  loadAllEvents();
+});
+
+// Funzioni per le notifiche toast
+function showNotification(text, timeout = 4000) {
+  let container = document.getElementById('notificationContainer');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'notificationContainer';
+    document.body.appendChild(container);
+  }
+
+  const el = document.createElement('div');
+  el.className = 'toast-notification';
+  el.textContent = text;
+  container.appendChild(el);
+
+  setTimeout(() => {
+    el.style.opacity = '0';
+    setTimeout(() => el.remove(), 300);
+  }, timeout);
+}
 
 // Funzione per fare fetch con auth
 async function fetchAuth(url, options = {}) {

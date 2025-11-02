@@ -8,6 +8,7 @@ import {
   deleteEvent,
   getUserCreatedEvents,
   getUserRegisteredEvents
+  ,reportEvent
 } from "../controllers/event.controller.js";
 
 const router = express.Router();
@@ -32,5 +33,8 @@ router.delete("/:id", verifyToken, deleteEvent);
 
 // Dettaglio di un singolo evento (alla fine!)
 router.get("/:id", getEventById);
+
+// Segnala un evento (notifica agli admin)
+router.post("/:id/report", verifyToken, reportEvent);
 
 export default router;

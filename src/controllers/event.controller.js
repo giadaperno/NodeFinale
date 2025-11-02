@@ -2,6 +2,8 @@ import { Op } from "sequelize";
 import EventRegistration from "../models/eventRegistration.model.js";
 import Event from "../models/event.model.js";
 import Registration from "../models/registration.model.js";
+import User from "../models/user.model.js";
+import { getIO } from "../utils/io.js";
 
 // Crea evento
 export const createEvent = async (req, res) => {
@@ -140,5 +142,38 @@ export const getUserRegisteredEvents = async (req, res) => {
   } catch (error) {
     console.error("Errore getUserRegisteredEvents:", error);
     res.status(500).json({ message: "Errore nel recupero eventi iscritti" });
+  }
+};
+
+// Segnala un evento (notifica live agli admin)
+export const reportEvent = async (req, res) => {
+  const { id } = req.params; // event id
+  const { reason } = req.body;
+  const reporterId = req.user.id;
+
+  try {
+    const event = await Event.findByPk(id);
+    if (!event) return res.status(404).json({ message: "Evento non trovato" });
+
+    const reporter = await User.findByPk(reporterId, { attributes: ['id', 'name'] });
+
+    // Emissione notifica verso gli admin (room 'admins')
+    const io = getIO();
+    if (io) {
+      io.to('admins').emit('event-reported', {
+        event: { id: event.id, title: event.title },
+        reporter: reporter?.toJSON(),
+        reason: reason || null,
+        reportedAt: new Date()
+      });
+      console.log(`Event ${id} segnalato da user ${reporterId}, notifica inviata agli admin`);
+    } else {
+      console.warn('Impossibile notificare admin: io non inizializzato');
+    }
+
+    res.json({ message: 'Segnalazione inviata agli admin' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Errore server', error: error.message });
   }
 };

@@ -1,13 +1,63 @@
 const token = localStorage.getItem("token");
 if (!token) window.location.href = "/login.html";
 
+// Redirect admin users to admin.html
+const payload = JSON.parse(atob(token.split('.')[1]));
+if (payload.role === 'admin') {
+  window.location.href = "/admin.html";
+}
+
 const headers = { 
   "Content-Type": "application/json",
   Authorization: `Bearer ${token}` 
 };
 
+// Debug info
+console.log('Token presente:', !!token);
+console.log('Token decodificato:', JSON.parse(atob(token.split('.')[1])));
+
+// Inizializzazione Socket.IO
+const socket = io({ 
+  auth: { token },
+  transports: ['websocket'],
+  timeout: 5000
+});
+
+socket.on('connect', () => {
+  console.log('Socket connesso:', socket.id);
+});
+
+socket.on('connect_error', (err) => {
+  console.error('Errore connessione socket:', err.message);
+  console.error('Dettagli errore:', err);
+});
+
+socket.on('new-message', (message) => {
+  if (message.EventId === currentEventId) {
+    appendMessage(message);
+  }
+});
+
+socket.on('user-registered', (payload) => {
+  console.log('user-registered', payload);
+  showNotification(`Nuova iscrizione evento ${payload.eventId}: ${payload.user?.name || 'Utente'}`);
+});
+
+socket.on('user-unregistered', (payload) => {
+  console.log('user-unregistered', payload);
+  showNotification(`Iscrizione annullata evento ${payload.eventId}: ${payload.user?.name || 'Utente'}`);
+});
+
+socket.on('event-reported', (payload) => {
+  console.log('event-reported', payload);
+  showNotification(`Segnalazione evento: ${payload.event?.title || payload.event?.id} da ${payload.reporter?.name || 'Utente'}`);
+});
+
 // 🔹 Logout
 document.getElementById("logoutBtn").addEventListener("click", () => {
+  if (socket) {
+    socket.disconnect();
+  }
   localStorage.removeItem("token");
   window.location.href = "/login.html";
 });
@@ -134,45 +184,10 @@ async function cancelRegistration(eventId) {
 }
 
 // 🔹 Chat functions
-let socket;
 let currentEventId;
-
-function connectToSocket() {
-  if (!socket) {
-    // Passiamo il token nel handshake per l'autenticazione lato server
-    socket = io({ auth: { token } });
-
-    socket.on('connect', () => {
-      console.log('Socket connesso:', socket.id);
-    });
-
-    socket.on('connect_error', (err) => {
-      console.error('Errore connessione socket:', err.message);
-      alert('Impossibile connettersi alla chat: ' + err.message);
-    });
-
-    socket.on('new-message', (message) => {
-      if (message.EventId === currentEventId) {
-        appendMessage(message);
-      }
-    });
-
-    // Notifiche iscrizioni / cancellazioni
-    socket.on('user-registered', (payload) => {
-      console.log('user-registered', payload);
-      showNotification(`Nuova iscrizione evento ${payload.eventId}: ${payload.user?.name || 'Utente'}`);
-    });
-
-    socket.on('user-unregistered', (payload) => {
-      console.log('user-unregistered', payload);
-      showNotification(`Iscrizione annullata evento ${payload.eventId}: ${payload.user?.name || 'Utente'}`);
-    });
-  }
-}
 
 async function openEventChat(eventId, eventTitle) {
   currentEventId = eventId;
-  connectToSocket();
   
   // Join the event's chat room
   socket.emit('join-event', eventId);

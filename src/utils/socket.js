@@ -30,6 +30,16 @@ export function setupSocketIO(server) {
   io.on("connection", (socket) => {
     console.log("Client connected:", socket.id);
 
+    // Se l'utente è admin, aggiungilo alla stanza 'admins' per notifiche globali
+    try {
+      if (socket.user && socket.user.role === 'admin') {
+        socket.join('admins');
+        console.log(`Admin ${socket.user.id} joined admins room`);
+      }
+    } catch (err) {
+      console.warn('Errore nel join degli admin:', err.message);
+    }
+
     socket.on("join-event", (eventId) => {
       socket.join(`event-${eventId}`);
       console.log(`User ${socket.user.id} joined event ${eventId}`);
