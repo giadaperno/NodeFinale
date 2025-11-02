@@ -1,5 +1,7 @@
 import Registration from "../models/registration.model.js";
 import Event from "../models/event.model.js";
+import User from "../models/user.model.js";
+import { getIO } from "../utils/io.js";
 
 // Iscrizione a un evento
 export const registerToEvent = async (req, res) => {
@@ -17,6 +19,16 @@ export const registerToEvent = async (req, res) => {
 
     // Crea la registrazione
     const registration = await Registration.create({ UserId: userId, EventId: eventId });
+
+    // Recupera informazioni utente per la notifica
+    const user = await User.findByPk(userId, { attributes: ['id', 'name'] });
+
+    // Emetti notifica live
+    const io = getIO();
+    if (io) {
+      io.to(`event-${eventId}`).emit('user-registered', { eventId, user: user?.toJSON() });
+    }
+
     res.json({ message: "Iscrizione avvenuta con successo", registration });
   } catch (error) {
     console.error(error);
@@ -38,6 +50,15 @@ export const cancelRegistration = async (req, res) => {
       return res.status(404).json({ message: "Registrazione non trovata" });
 
     await registration.destroy();
+    // Recupera informazioni utente per la notifica
+    const user = await User.findByPk(userId, { attributes: ['id', 'name'] });
+
+    // Emetti notifica live
+    const io = getIO();
+    if (io) {
+      io.to(`event-${eventId}`).emit('user-unregistered', { eventId, user: user?.toJSON() });
+    }
+
     res.json({ message: "Iscrizione annullata con successo" });
   } catch (error) {
     console.error(error);

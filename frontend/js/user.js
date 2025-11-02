@@ -156,6 +156,17 @@ function connectToSocket() {
         appendMessage(message);
       }
     });
+
+    // Notifiche iscrizioni / cancellazioni
+    socket.on('user-registered', (payload) => {
+      console.log('user-registered', payload);
+      showNotification(`Nuova iscrizione evento ${payload.eventId}: ${payload.user?.name || 'Utente'}`);
+    });
+
+    socket.on('user-unregistered', (payload) => {
+      console.log('user-unregistered', payload);
+      showNotification(`Iscrizione annullata evento ${payload.eventId}: ${payload.user?.name || 'Utente'}`);
+    });
   }
 }
 
@@ -218,6 +229,37 @@ async function loadChatMessages(eventId) {
   } catch (err) {
     console.error('Errore nel caricamento dei messaggi:', err);
   }
+}
+
+// Toast notification semplice
+function showNotification(text, timeout = 4000) {
+  let container = document.getElementById('notificationContainer');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'notificationContainer';
+    container.style.position = 'fixed';
+    container.style.top = '10px';
+    container.style.right = '10px';
+    container.style.zIndex = 2000;
+    document.body.appendChild(container);
+  }
+
+  const el = document.createElement('div');
+  el.className = 'toast-notification';
+  el.style.background = '#333';
+  el.style.color = 'white';
+  el.style.padding = '8px 12px';
+  el.style.marginTop = '8px';
+  el.style.borderRadius = '6px';
+  el.style.boxShadow = '0 2px 6px rgba(0,0,0,0.2)';
+  el.textContent = text;
+  container.appendChild(el);
+
+  setTimeout(() => {
+    el.style.transition = 'opacity 0.3s';
+    el.style.opacity = '0';
+    setTimeout(() => el.remove(), 300);
+  }, timeout);
 }
 
 function appendMessage(message) {
