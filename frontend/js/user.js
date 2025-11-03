@@ -311,10 +311,10 @@ async function registerEvent(eventId, eventTitle) {
 
     const data = await res.json();
     if (res.ok) {
-      alert(`✅ Ti sei iscritto a "${eventTitle}"`);
+      alert(`Ti sei iscritto a "${eventTitle}"`);
       loadMyRegisteredEvents(); // aggiorna dashboard
     } else {
-      alert(`⚠️ Errore iscrizione: ${data.message}`);
+      alert(`Errore iscrizione: ${data.message}`);
     }
   } catch (err) {
     console.error("Errore iscrizione evento:", err);
@@ -337,10 +337,10 @@ async function cancelRegistration(eventId) {
     const data = await res.json();
     if (!res.ok) throw new Error(data.message);
 
-    alert(`✅ Iscrizione annullata`);
+    alert(`Iscrizione annullata`);
     loadMyRegisteredEvents(); // aggiorna dashboard
   } catch (err) {
-    alert(`⚠️ Errore: ${err.message}`);
+    alert(`Errore: ${err.message}`);
   }
 }
 
