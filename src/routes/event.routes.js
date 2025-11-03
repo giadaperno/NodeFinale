@@ -7,8 +7,8 @@ import {
   updateEvent,
   deleteEvent,
   getUserCreatedEvents,
-  getUserRegisteredEvents
-  ,reportEvent
+  getUserRegisteredEvents,
+  reportEvent
 } from "../controllers/event.controller.js";
 
 const router = express.Router();

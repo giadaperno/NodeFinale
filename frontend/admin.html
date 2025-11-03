@@ -67,7 +67,7 @@ socket.on('connect_error', (err) => {
 // Notifiche per eventi segnalati
 socket.on('event-reported', (payload) => {
   console.log('Evento segnalato:', payload);
-  showNotification(`⚠️ Segnalazione: "${payload.event?.title || 'Evento #' + payload.event?.id}" da ${payload.reporter?.name || 'Utente'}`);
+  showNotification(`Segnalazione: "${payload.event?.title || 'Evento #' + payload.event?.id}" da ${payload.reporter?.name || 'Utente'}`);
   // Ricarica la lista eventi per mostrare eventuali aggiornamenti
   loadAllEvents();
 });
