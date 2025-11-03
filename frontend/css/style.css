@@ -120,6 +120,9 @@ body {
   padding: 30px;
   border-radius: 15px;
   box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Centra gli elementi figli orizzontalmente */
 }
 
 header {
@@ -394,11 +397,11 @@ button.danger:hover {
 
 /* Form styles */
 input, textarea, select {
-  width: 80%; /* Riduci la larghezza per permettere il centraggio */
+  width: 100%;
   padding: 8px 12px;
   border: 1px solid var(--text-light);
   border-radius: 6px;
-  margin: 0 auto 15px auto; /* Centra orizzontalmente */
+  margin-bottom: 15px;
   font-size: 1rem;
 }
 }

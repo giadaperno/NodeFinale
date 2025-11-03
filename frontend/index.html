@@ -59,26 +59,55 @@ async function loadEvents(filters = {}) {
 
   eventsContainer.innerHTML = '';
   events.forEach(event => {
+    const eventDate = new Date(event.date);
+    const registeredCount = event.registrations?.length || 0;
+    const capacityPercentage = (registeredCount / event.capacity) * 100;
+
     const box = document.createElement('div');
     box.className = 'event-box';
     box.innerHTML = `
-      <h3>${event.title}</h3>
-      <p>${event.description}</p>
-      <p><strong>Categoria:</strong> ${event.category}</p>
-      <p><strong>Luogo:</strong> ${event.location}</p>
-      <p><strong>Data:</strong> ${new Date(event.date).toLocaleDateString()}</p>
-      <button onclick="registerEvent(${event.id}, '${event.title}')">Iscriviti</button>
-      <button onclick="cancelEvent(${event.id}, '${event.title}')">Annulla iscrizione</button>
+      <img src="${event.image || '/assets/images/defaults/event-default.jpg'}" alt="${event.title}" class="event-image">
+      <div class="event-content">
+        <span class="category-badge">${event.category || 'Generale'}</span>
+        <h3 class="event-title">${event.title}</h3>
+        
+        <div class="event-meta">
+          <span><i class="fas fa-map-marker-alt"></i> ${event.location}</span>
+          <span><i class="fas fa-calendar"></i> ${eventDate.toLocaleDateString('it-IT', { 
+            weekday: 'long', 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric'
+          })}</span>
+          <span><i class="fas fa-clock"></i> ${eventDate.toLocaleTimeString('it-IT', { 
+            hour: '2-digit', 
+            minute: '2-digit'
+          })}</span>
+        </div>
+
+        <p class="event-description">${event.description || 'Nessuna descrizione disponibile'}</p>
+
+        <div class="capacity-indicator">
+          <span><i class="fas fa-users"></i> ${registeredCount}/${event.capacity} partecipanti</span>
+          <div class="capacity-bar">
+            <div class="capacity-fill" style="width: ${capacityPercentage}%"></div>
+          </div>
+        </div>
+
+        <div class="event-actions">
+          <button onclick="registerEvent(${event.id}, '${event.title.replace(/\'/g, "\\'")}')" class="primary">
+            <i class="fas fa-check"></i> Iscriviti
+          </button>
+        </div>
     `;
     eventsContainer.appendChild(box);
   });
 }
 
 // Iscrizione a un evento
-async function registerEvent(eventId, title) {
+async function registerEvent(eventId, eventTitle) {
   const token = localStorage.getItem('token');
   if (!token) {
-    // Se non loggato, vai al login
     window.location.href = '/login.html';
     return;
   }
@@ -89,34 +118,15 @@ async function registerEvent(eventId, title) {
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
       body: JSON.stringify({ eventId })
     });
-    const data = await res.json();
-    alert(data.message || `Iscrizione all'evento "${title}" avvenuta con successo su EventHub!`);
-  } catch (err) {
-    console.error(err);
-    alert('Errore durante l\'iscrizione su EventHub');
-  }
-}
 
-// Annulla iscrizione a un evento
-async function cancelEvent(eventId, title) {
-  const token = localStorage.getItem('token');
-  if (!token) {
-    // Se non loggato, vai al login
-    window.location.href = '/login.html';
-    return;
-  }
-
-  try {
-    const res = await fetch('/api/registrations', {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-      body: JSON.stringify({ eventId })
-    });
     const data = await res.json();
-    alert(data.message || `Iscrizione all'evento "${title}" annullata su EventHub!`);
+    if (res.ok) {
+      alert(`✅ Ti sei iscritto a "${eventTitle}"`);
+    } else {
+      alert(`⚠️ Errore iscrizione: ${data.message}`);
+    }
   } catch (err) {
-    console.error(err);
-    alert('Errore durante l\'annullamento su EventHub');
+    console.error("Errore iscrizione evento:", err);
   }
 }
 
