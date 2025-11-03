@@ -53,7 +53,7 @@ socket.on('event-reported', (payload) => {
   showNotification(`Segnalazione evento: ${payload.event?.title || payload.event?.id} da ${payload.reporter?.name || 'Utente'}`);
 });
 
-// 🔹 Logout
+// Logout
 document.getElementById("logoutBtn").addEventListener("click", () => {
   if (socket) {
     socket.disconnect();
@@ -62,7 +62,7 @@ document.getElementById("logoutBtn").addEventListener("click", () => {
   window.location.href = "/login.html";
 });
 
-// 🔹 Carica eventi pubblici
+// Carica eventi pubblici
 async function loadPublicEvents() {
   try {
     const res = await fetch("/api/events");
@@ -129,7 +129,7 @@ async function loadPublicEvents() {
   }
 }
 
-// 🔹 Carica eventi creati dall’utente
+// Carica eventi creati dall’utente
 async function loadMyCreatedEvents() {
   try {
     const res = await fetch("/api/events/my-created", { headers });
@@ -183,7 +183,7 @@ async function loadMyCreatedEvents() {
   }
 }
 
-// 🔹 Carica eventi a cui l'utente è iscritto
+// Carica eventi a cui l'utente è iscritto
 async function loadMyRegisteredEvents() {
   try {
     const res = await fetch("/api/registrations/user-events", { headers });
@@ -242,7 +242,7 @@ async function loadMyRegisteredEvents() {
   }
 }
 
-// 🔹 Azioni eventi
+// Azioni eventi
 function editEvent(id) {
   window.location.href = `/edit-event.html?id=${id}`;
 }
@@ -254,8 +254,13 @@ async function deleteEvent(id) {
   }
 }
 
-// 🔹 Iscrizione a un evento
+// Iscrizione a un evento
 async function registerEvent(eventId, eventTitle) {
+  if (!token) {
+    window.location.href = "/login.html";
+    return;
+  }
+  
   try {
     const res = await fetch("/api/registrations", {
       method: "POST",
@@ -275,8 +280,13 @@ async function registerEvent(eventId, eventTitle) {
   }
 }
 
-// 🔹 Annulla iscrizione a un evento
+// Annulla iscrizione a un evento
 async function cancelRegistration(eventId) {
+  if (!token) {
+    window.location.href = "/login.html";
+    return;
+  }
+
   try {
     const res = await fetch(`/api/registrations/${eventId}`, {
       method: "DELETE",
@@ -293,7 +303,7 @@ async function cancelRegistration(eventId) {
   }
 }
 
-// 🔹 Chat functions
+// Chat functions
 let currentEventId;
 
 async function openEventChat(eventId, eventTitle) {
@@ -432,7 +442,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
-// 🔹 Inizializza dashboard
+// Inizializza dashboard
 loadPublicEvents();
 loadMyCreatedEvents();
 loadMyRegisteredEvents();
