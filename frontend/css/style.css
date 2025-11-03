@@ -154,10 +154,32 @@ h2, h3 {
 .box {
   background: var(--white);
   border-radius: 10px;
-  padding: 20px;
+  padding: 30px;
   box-shadow: var(--shadow);
   flex: 1;
   min-width: 300px;
+}
+
+.filters {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 25px;
+  flex-wrap: wrap;
+  align-items: center;
+  padding: 15px;
+  background: var(--bg-light);
+  border-radius: 8px;
+}
+
+.filters input,
+.filters button {
+  margin: 0;
+}
+
+.filters input {
+  flex: 1;
+  min-width: 200px;
+  margin-bottom: 0;
 }
 
 .events {
