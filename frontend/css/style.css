@@ -394,12 +394,13 @@ button.danger:hover {
 
 /* Form styles */
 input, textarea, select {
-  width: 100%;
+  width: 80%; /* Riduci la larghezza per permettere il centraggio */
   padding: 8px 12px;
   border: 1px solid var(--text-light);
   border-radius: 6px;
-  margin-bottom: 15px;
+  margin: 0 auto 15px auto; /* Centra orizzontalmente */
   font-size: 1rem;
+}
 }
 
 input:focus, textarea:focus, select:focus {

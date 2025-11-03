@@ -4,22 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>EventHub - Registrati</title>
-<style>
-  body { font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background: #f5f5f5; }
-  .register-container { background: #fff; padding: 30px; border-radius: 8px; width: 350px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-  h2 { margin: 0 0 5px 0; }
-  p.subtitle { margin: 0 0 20px 0; color: #555; font-size: 0.9em; }
-  input { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; }
-  button { width: 100%; padding: 10px; background: #28a745; color: #fff; border: none; border-radius: 4px; cursor: pointer; margin-bottom: 10px; }
-  button:hover { background: #218838; }
-  .link { text-align: center; margin-top: 10px; font-size: 0.9em; }
-  .link a { color: #007bff; text-decoration: none; }
-  .link a:hover { text-decoration: underline; }
-</style>
+<link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
 
-<div class="register-container">
+<header>
+  <h1>EventHub - Registrati</h1>
+  <button id="homeBtn" class="secondary">Home</button>
+</header>
+
+<div class="auth-container">
   <h2>Registrati</h2>
   <p class="subtitle">Crea il tuo account su EventHub per iscriverti agli eventi</p>
 
@@ -27,8 +21,7 @@
   <input type="email" id="email" placeholder="Email">
   <input type="password" id="password" placeholder="Password">
 
-  <button id="registerBtn">Registrati</button>
-  <button id="homeBtn" style="background:#6c757d;">Home</button>
+  <button id="registerBtn" class="primary">Registrati</button>
 
   <div class="link">Hai già un account? <a href="/login.html">Accedi</a></div>
 
