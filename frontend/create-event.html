@@ -36,14 +36,53 @@ const token = localStorage.getItem('token');
 if (!token) window.location.href = '/login.html';
 
 document.getElementById('createBtn').addEventListener('click', async () => {
+  const title = document.getElementById('title').value;
+  const description = document.getElementById('description').value;
+  const category = document.getElementById('category').value;
+  const location = document.getElementById('location').value;
+  const date = document.getElementById('date').value;
+  const capacity = document.getElementById('capacity').value;
+  const image = document.getElementById('image').value;
+
+  const messageDiv = document.getElementById('message');
+  messageDiv.textContent = ''; // Clear previous messages
+  messageDiv.style.color = 'red';
+
+  const errors = [];
+
+  // Client-side validation
+  if (!title) {
+    errors.push('Il titolo dell\'evento è obbligatorio.');
+  }
+  if (!description) {
+    errors.push('La descrizione dell\'evento è obbligatoria.');
+  }
+  if (!category) {
+    errors.push('La categoria è obbligatoria.');
+  }
+  if (!location) {
+    errors.push('Il luogo è obbligatorio.');
+  }
+  if (!date) {
+    errors.push('La data è obbligatoria.');
+  }
+  if (!capacity || isNaN(capacity) || parseInt(capacity) <= 0) {
+    errors.push('La capacità è obbligatoria e deve essere un numero positivo.');
+  }
+
+  if (errors.length > 0) {
+    messageDiv.innerHTML = errors.join('<br>');
+    return;
+  }
+
   const event = {
-    title: document.getElementById('title').value,
-    description: document.getElementById('description').value,
-    category: document.getElementById('category').value,
-    location: document.getElementById('location').value,
-    date: document.getElementById('date').value,
-    capacity: document.getElementById('capacity').value,
-    image: document.getElementById('image').value
+    title,
+    description,
+    category,
+    location,
+    date,
+    capacity: parseInt(capacity),
+    image
   };
 
   try {
