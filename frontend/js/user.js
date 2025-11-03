@@ -127,6 +127,9 @@ async function loadPublicEvents() {
                   <i class="fas fa-comments"></i> Chat
                 </button>
               `}
+              <button onclick="reportEvent(${event.id}, '${event.title.replace(/'/g, "\\'")}')" class="tertiary report-button">
+                <i class="fas fa-flag"></i> Segnala
+              </button>
             ` : '<span class="badge">Evento passato</span>'}
           </div>
         </div>
@@ -135,6 +138,35 @@ async function loadPublicEvents() {
     });
   } catch (err) {
     console.error("Errore nel caricamento degli eventi pubblici:", err);
+  }
+}
+
+// Funzione per segnalare un evento
+async function reportEvent(eventId, eventTitle) {
+  if (!token) {
+    window.location.href = "/login.html";
+    return;
+  }
+
+  if (!confirm(`Sei sicuro di voler segnalare l'evento "${eventTitle}"?`)) {
+    return;
+  }
+
+  try {
+    const res = await fetch(`/api/events/${eventId}/report`, {
+      method: "POST",
+      headers
+    });
+
+    const data = await res.json();
+    if (res.ok) {
+      alert(`✅ Evento "${eventTitle}" segnalato con successo.`);
+    } else {
+      alert(`⚠️ Errore durante la segnalazione: ${data.message}`);
+    }
+  } catch (err) {
+    console.error("Errore durante la segnalazione dell'evento:", err);
+    alert("Errore durante la segnalazione dell'evento.");
   }
 }
 

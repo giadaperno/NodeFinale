@@ -1,6 +1,7 @@
-import { Op } from "sequelize";
 import EventRegistration from "../models/eventRegistration.model.js"; 
 import Event from "../models/event.model.js";
+import User from "../models/user.model.js"; // Importa il modello User
+import { getIO } from "../utils/io.js"; // Importa getIO
 
 // Crea evento
 export const createEvent = async (req, res) => {
@@ -149,7 +150,27 @@ export const getUserRegisteredEvents = async (req, res) => {
 // Segnala un evento
 export const reportEvent = async (req, res) => {
   const { id } = req.params;
-  // Qui andrebbe la logica per segnalare l'evento, ad esempio inviando una notifica all'admin
-  console.log(`Evento ${id} segnalato dall'utente ${req.user.id}`);
-  res.status(200).json({ message: `Evento ${id} segnalato con successo.` });
+  const reporterId = req.user.id;
+
+  try {
+    const event = await Event.findByPk(id);
+    if (!event) return res.status(404).json({ message: "Evento non trovato" });
+
+    const reporter = await User.findByPk(reporterId, { attributes: ['id', 'name'] });
+
+    // Emetti notifica live agli admin
+    const io = getIO();
+    if (io) {
+      io.emit('event-reported', { 
+        event: event.toJSON(), 
+        reporter: reporter?.toJSON() 
+      });
+    }
+
+    console.log(`Evento ${id} segnalato dall'utente ${reporterId}`);
+    res.status(200).json({ message: `Evento ${id} segnalato con successo.` });
+  } catch (error) {
+    console.error("Errore durante la segnalazione dell'evento:", error);
+    res.status(500).json({ message: "Errore server", error: error.message });
+  }
 };
