@@ -99,7 +99,7 @@ export const forgotPassword = async (req, res) => {
     user.resetTokenExpiry = expiry;
     await user.save();
 
-    const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
+    const resetUrl = `${process.env.FRONTEND_URL}/reset-password.html?token=${resetToken}`;
 
     await transporter.sendMail({
       from: `"EventHub" <${process.env.EMAIL_USER}>`,
@@ -112,6 +112,8 @@ export const forgotPassword = async (req, res) => {
         <p>Il link scadrà tra 1 ora.</p>
       `,
     });
+    
+    console.log(`Email di reset inviata a ${user.email} con URL: ${resetUrl}`);
 
     res.json({ message: "Email di reset inviata" });
   } catch (error) {
