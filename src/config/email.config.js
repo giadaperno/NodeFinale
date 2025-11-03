@@ -5,16 +5,19 @@ dotenv.config();
 
 // Crea il trasportatore per l'invio delle email
 export const createTransporter = () => {
+  const user = process.env.EMAIL_USER;
+  const pass = process.env.EMAIL_PASS;
+
+  if (!user || !pass) {
+    throw new Error("Configurazione email mancante: impostare EMAIL_USER e EMAIL_PASS nel .env");
+  }
+
+  // Configurazione SMTP esplicita (Gmail)
   return nodemailer.createTransport({
-    service: "gmail",  // Usa il servizio predefinito per Gmail
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS,
-    },
-    tls: {
-      rejectUnauthorized: false  // Accetta certificati non validi (solo per sviluppo)
-    },
-    debug: true,  // Attiva il debug
+    host: process.env.SMTP_HOST || "smtp.gmail.com",
+    port: Number(process.env.SMTP_PORT) || 465,
+    secure: process.env.SMTP_SECURE ? process.env.SMTP_SECURE === "true" : true, // 465 => secure true
+    auth: { user, pass },
   });
 };
 
@@ -22,6 +25,15 @@ export const createTransporter = () => {
 export const sendPasswordResetEmail = async (to, token, userName) => {
   try {
     const transporter = createTransporter();
+
+    // Verifica connessione SMTP per messaggi di errore più chiari
+    try {
+      await transporter.verify();
+      console.log("SMTP verificato correttamente per", process.env.EMAIL_USER);
+    } catch (verifyErr) {
+      console.error("SMTP verify fallito:", verifyErr.message);
+      throw new Error("Configurazione SMTP non valida: " + verifyErr.message);
+    }
 
     const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:5000'}/reset-password.html?token=${token}`;
 
@@ -41,7 +53,7 @@ export const sendPasswordResetEmail = async (to, token, userName) => {
 
     // Invia l'email
     const info = await transporter.sendMail(mailOptions);
-    console.log(`Email di reset inviata a ${to}`);
+    console.log(`Email di reset inviata a ${to} (messageId: ${info.messageId})`);
     return info;
   } catch (error) {
     console.error('Errore nell\'invio dell\'email di reset password:', error);
