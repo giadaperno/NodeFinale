@@ -70,11 +70,17 @@ async function loadPublicEvents() {
     const container = document.getElementById("eventsContainer");
     container.innerHTML = "";
 
+    // Recupera gli ID degli eventi a cui l'utente è iscritto
+    const registeredEventsRes = await fetch("/api/registrations/user-events", { headers });
+    const registeredEvents = await registeredEventsRes.json();
+    const registeredEventIds = new Set(registeredEvents.map(event => event.id));
+
     events.forEach(event => {
       const eventDate = new Date(event.date);
       const isUpcoming = eventDate > new Date();
       const registeredCount = event.registrations?.length || 0;
       const capacityPercentage = (registeredCount / event.capacity) * 100;
+      const isRegistered = registeredEventIds.has(event.id);
 
       const box = document.createElement("div");
       box.className = "event-box";
@@ -109,15 +115,18 @@ async function loadPublicEvents() {
 
           <div class="event-actions">
             ${isUpcoming ? `
-              <button onclick="registerEvent(${event.id}, '${event.title.replace(/'/g, "\\'")}')" class="primary">
-                <i class="fas fa-check"></i> Iscriviti
-              </button>
-              <button onclick="cancelRegistration(${event.id})" class="secondary">
-                <i class="fas fa-times"></i> Annulla
-              </button>
-              <button onclick="openEventChat(${event.id}, '${event.title.replace(/'/g, "\\'")}')" class="secondary">
-                <i class="fas fa-comments"></i> Chat
-              </button>
+              ${!isRegistered ? `
+                <button onclick="registerEvent(${event.id}, '${event.title.replace(/'/g, "\\'")}')" class="primary">
+                  <i class="fas fa-check"></i> Iscriviti
+                </button>
+              ` : `
+                <button onclick="cancelRegistration(${event.id})" class="secondary">
+                  <i class="fas fa-times"></i> Annulla
+                </button>
+                <button onclick="openEventChat(${event.id}, '${event.title.replace(/'/g, "\\'")}')" class="primary">
+                  <i class="fas fa-comments"></i> Chat
+                </button>
+              `}
             ` : '<span class="badge">Evento passato</span>'}
           </div>
         </div>
