@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import crypto from "crypto";
 import { Op } from "sequelize";
-import { transporter } from "../config/email.config.js";
+import { sendPasswordResetEmail } from "../config/email.config.js";
 
 dotenv.config();
 
@@ -99,23 +99,18 @@ export const forgotPassword = async (req, res) => {
     user.resetTokenExpiry = expiry;
     await user.save();
 
-    const resetUrl = `${process.env.FRONTEND_URL}/reset-password.html?token=${resetToken}`;
-
-    await transporter.sendMail({
-      from: `"EventHub" <${process.env.EMAIL_USER}>`,
-      to: user.email,
-      subject: "Reset password EventHub",
-      html: `
-        <h3>Ciao ${user.name},</h3>
-        <p>Hai richiesto di reimpostare la tua password. Clicca il link qui sotto:</p>
-        <a href="${resetUrl}">${resetUrl}</a>
-        <p>Il link scadrà tra 1 ora.</p>
-      `,
-    });
-    
-    console.log(`Email di reset inviata a ${user.email} con URL: ${resetUrl}`);
-
-    res.json({ message: "Email di reset inviata" });
+    try {
+      // Utilizzo della nuova funzione sendPasswordResetEmail
+      await sendPasswordResetEmail(user.email, resetToken, user.name);
+      
+      res.json({ message: "Email di reset inviata" });
+    } catch (emailError) {
+      console.error("Errore nell'invio dell'email:", emailError);
+      res.status(500).json({ 
+        message: "Errore nell'invio dell'email di reset",
+        error: emailError.message
+      });
+    }
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Errore server", error: error.message });
