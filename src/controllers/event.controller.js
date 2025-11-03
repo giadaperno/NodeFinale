@@ -2,6 +2,7 @@ import EventRegistration from "../models/eventRegistration.model.js";
 import Event from "../models/event.model.js";
 import User from "../models/user.model.js"; // Importa il modello User
 import { getIO } from "../utils/io.js"; // Importa getIO
+import { Op } from "sequelize";
 
 // Crea evento
 export const createEvent = async (req, res) => {
@@ -37,7 +38,14 @@ export const listEvents = async (req, res) => {
 
     const filters = { isApproved: true };
 
-    if (date) filters.date = date;
+    if (date) {
+      const day = new Date(date);
+      const startOfDay = new Date(day);
+      startOfDay.setHours(0, 0, 0, 0);
+      const endOfDay = new Date(day);
+      endOfDay.setHours(23, 59, 59, 999);
+      filters.date = { [Op.between]: [startOfDay, endOfDay] };
+    }
     if (category) filters.category = { [Op.like]: `%${category}%` };
     if (location) filters.location = { [Op.like]: `%${location}%` };
 
