@@ -9,14 +9,15 @@
 </head>
 <body>
 
-<header>
-  <h1>EventHub - Registrati</h1>
-  <button id="homeBtn" class="secondary">Home</button>
-</header>
+<div class="hero-section" style="height: 200px; margin-bottom: 0;">
+  <h1>Unisciti a EventHub</h1>
+  <p>Crea il tuo account per scoprire e partecipare agli eventi della community</p>
+</div>
 
 <div class="auth-container">
-  <h2>Registrati</h2>
-  <p class="subtitle">Crea il tuo account su EventHub per iscriverti agli eventi</p>
+  <div style="text-align: center; margin-bottom: 30px;">
+    <i class="fas fa-user-plus" style="font-size: 3rem; color: var(--primary);"></i>
+  </div>
 
   <input type="text" id="name" placeholder="Nome">
   <input type="email" id="email" placeholder="Email">
@@ -27,10 +28,13 @@
   </div>
 
   <button id="registerBtn" class="primary">Registrati</button>
+  <button id="homeBtn" class="secondary">Torna alla home</button>
 
-  <div class="link">Hai già un account? <a href="/login.html">Accedi</a></div>
+  <div class="link" style="margin-top: 20px;">
+    Hai già un account? <a href="/login.html" style="color: var(--primary);">Accedi</a>
+  </div>
 
-  <div id="message" style="color:red; margin-top:10px;"></div>
+  <div id="message" style="color: #E53E3E; margin-top: 15px; text-align: center;"></div>
 </div>
 
 <script>
