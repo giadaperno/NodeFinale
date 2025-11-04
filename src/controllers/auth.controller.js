@@ -90,7 +90,10 @@ export const forgotPassword = async (req, res) => {
 
   try {
     const user = await User.findOne({ where: { email } });
-    if (!user) return res.status(404).json({ message: "Utente non trovato" });
+    if (!user) {
+      // Non rivelare se l'email esiste o meno per sicurezza
+      return res.json({ message: "Se l'email è registrata, riceverai un link per il reset della password." });
+    }
 
     const resetToken = crypto.randomBytes(32).toString("hex");
     const expiry = Date.now() + 3600000; // 1 ora
@@ -99,20 +102,19 @@ export const forgotPassword = async (req, res) => {
     user.resetTokenExpiry = expiry;
     await user.save();
 
+    // Rispondi subito all'utente, invia email in background
+    res.json({ message: "Se l'email è registrata, riceverai un link per il reset della password." });
+
+    // Invia email in background senza bloccare la risposta
     try {
-      // Utilizzo della nuova funzione sendPasswordResetEmail
       await sendPasswordResetEmail(user.email, resetToken, user.name);
-      
-      res.json({ message: "Email di reset inviata" });
+      console.log(`Email di reset inviata a ${user.email}`);
     } catch (emailError) {
       console.error("Errore nell'invio dell'email:", emailError);
-      res.status(500).json({ 
-        message: "Errore nell'invio dell'email di reset",
-        error: emailError.message
-      });
+      // L'errore viene loggato ma non blocca la risposta all'utente
     }
   } catch (error) {
-    console.error(error);
+    console.error("Errore forgot password:", error);
     res.status(500).json({ message: "Errore server", error: error.message });
   }
 };
