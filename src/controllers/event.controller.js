@@ -1,8 +1,7 @@
-import EventRegistration from "../models/eventRegistration.model.js"; 
 import Event from "../models/event.model.js";
-import User from "../models/user.model.js"; // Importa il modello User
-import { getIO } from "../utils/io.js"; // Importa getIO
-import { createNotification } from "./notification.controller.js"; // Importa createNotification
+import User from "../models/user.model.js";
+import { getIO } from "../utils/io.js";
+import { createNotification } from "./notification.controller.js";
 import { Op } from "sequelize";
 import sequelize from "../config/db.js";
 
@@ -43,8 +42,6 @@ export const createEvent = async (req, res) => {
       UserId: userId, // collegamento al creatore
       isApproved: false,
     });
-
-    console.log("Creatore evento:", userId, "UserId nell'evento:", event.UserId);
 
     res.status(201).json({ message: "Evento creato con successo", event });
   } catch (error) {
@@ -123,8 +120,6 @@ export const updateEvent = async (req, res) => {
   const { id } = req.params;
   const { title, description, category, location, date, capacity, image } = req.body;
 
-  console.log("Utente che modifica:", req.user.id, "Ruolo:", req.user.role);
-
   try {
     const event = await Event.findByPk(id);
     if (!event) return res.status(404).json({ message: "Evento non trovato" });
@@ -151,7 +146,6 @@ export const updateEvent = async (req, res) => {
 
 export const deleteEvent = async (req, res) => {
   const { id } = req.params;
-  console.log("Utente che cancella:", req.user.id, "Ruolo:", req.user.role);
 
   try {
     const event = await Event.findByPk(id);
@@ -195,40 +189,6 @@ export const getUserCreatedEvents = async (req, res) => {
   }
 };
 
-// Eventi a cui l'utente autenticato si è registrato
-export const getUserRegisteredEvents = async (req, res) => {
-  try {
-    const userId = req.user.id;
-
-    const registrations = await EventRegistration.findAll({
-      where: { UserId: userId },
-      include: [{ 
-        model: Event, 
-        as: "event",
-        include: [{
-          model: User,
-          as: "participants",
-          attributes: [],
-          through: { attributes: [] },
-          required: false
-        }],
-        attributes: {
-          include: [[sequelize.fn("COUNT", sequelize.col("event->participants.id")), "participantCount"]]
-        },
-      }],
-      group: ["EventRegistration.id", "event.id"],
-    });
-
-    // Estrai l'evento dall'alias
-    const events = registrations.map(r => r.event);
-    res.json(events);
-    
-  } catch (error) {
-    console.error("Errore getUserRegisteredEvents:", error);
-    res.status(500).json({ message: "Errore nel recupero eventi iscritti" });
-  }
-};
-
 // Segnala un evento
 export const reportEvent = async (req, res) => {
   const { id } = req.params;
@@ -258,7 +218,6 @@ export const reportEvent = async (req, res) => {
       });
     }
 
-    console.log(`Evento ${id} segnalato dall'utente ${reporterId}`);
     res.status(200).json({ message: `Evento ${id} segnalato con successo.` });
   } catch (error) {
     console.error("Errore durante la segnalazione dell'evento:", error);
