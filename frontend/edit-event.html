@@ -4,17 +4,38 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>EventHub - Modifica Evento</title>
+<link rel="stylesheet" href="/css/style.css">
 <style>
-  body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
-  .container { background: #fff; padding: 20px; border-radius: 8px; max-width: 500px; margin: auto; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-  input, textarea { width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 4px; border: 1px solid #ccc; }
-  button { padding: 10px; background: #007bff; color: #fff; border: none; border-radius: 4px; cursor: pointer; }
-  button:hover { background: #0056b3; }
+  .edit-container { 
+    background: #fff; 
+    padding: 20px; 
+    border-radius: 8px; 
+    max-width: 500px; 
+    margin: 20px auto; 
+    box-shadow: 0 0 10px rgba(0,0,0,0.1); 
+  }
+  .edit-container input, 
+  .edit-container textarea { 
+    width: 100%; 
+    padding: 10px; 
+    margin-bottom: 10px; 
+    border-radius: 4px; 
+    border: 1px solid #ccc; 
+    box-sizing: border-box;
+  }
+  .edit-container button {
+    margin-right: 10px;
+  }
 </style>
 </head>
 <body>
 
-<div class="container">
+<header>
+  <h1>EventHub - Modifica Evento</h1>
+  <button id="backBtn" class="secondary">Indietro</button>
+</header>
+
+<div class="edit-container">
   <h2>Modifica Evento</h2>
   
   <input type="text" id="title" placeholder="Titolo evento">
@@ -25,8 +46,8 @@
   <input type="number" id="capacity" placeholder="Capacità">
   <input type="text" id="image" placeholder="URL immagine (opzionale)">
   
-  <button id="updateBtn">Salva Modifiche</button>
-  <button id="backBtn" style="background:#6c757d;">Indietro</button>
+  <button id="updateBtn" class="primary">Salva Modifiche</button>
+  <button id="backBtn" class="secondary">Indietro</button>
 
   <div id="message" style="color:red; margin-top:10px;"></div>
 </div>

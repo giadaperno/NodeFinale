@@ -41,11 +41,21 @@ socket.on('new-message', (message) => {
 socket.on('user-registered', (payload) => {
   console.log('user-registered', payload);
   showNotification(`Nuova iscrizione evento ${payload.eventId}: ${payload.user?.name || 'Utente'}`);
+  // Aggiorna il contatore dei partecipanti
+  updateParticipantCount(payload.eventId, payload.participantCount);
 });
 
 socket.on('user-unregistered', (payload) => {
   console.log('user-unregistered', payload);
   showNotification(`Iscrizione annullata evento ${payload.eventId}: ${payload.user?.name || 'Utente'}`);
+  // Aggiorna il contatore dei partecipanti
+  updateParticipantCount(payload.eventId, payload.participantCount);
+});
+
+socket.on('participant-count-updated', (payload) => {
+  console.log('participant-count-updated', payload);
+  // Aggiorna il contatore dei partecipanti
+  updateParticipantCount(payload.eventId, payload.participantCount);
 });
 
 socket.on('event-reported', (payload) => {
@@ -78,12 +88,13 @@ async function loadPublicEvents() {
     events.forEach(event => {
       const eventDate = new Date(event.date);
       const isUpcoming = eventDate > new Date();
-      const registeredCount = event.registrations?.length || 0;
+      const registeredCount = event.participantCount || 0;
       const capacityPercentage = (registeredCount / event.capacity) * 100;
       const isRegistered = registeredEventIds.has(event.id);
 
       const box = document.createElement("div");
       box.className = "event-box";
+      box.setAttribute("data-event-id", event.id);
       box.innerHTML = `
         <img src="${event.image || '/assets/images/defaults/event-default.jpg'}" alt="${event.title}" class="event-image">
         <div class="event-content">
@@ -179,11 +190,11 @@ async function loadMyCreatedEvents() {
     container.innerHTML = events.length
       ? events.map(e => {
           const eventDate = new Date(e.date);
-          const registeredCount = e.registrations?.length || 0;
+          const registeredCount = e.participantCount || 0;
           const capacityPercentage = (registeredCount / e.capacity) * 100;
           
           return `
-            <div class="event-box">
+            <div class="event-box" data-event-id="${e.id}">
               <img src="${e.image || '/assets/images/defaults/event-default.jpg'}" alt="${e.title}" class="event-image">
               <div class="event-content">
                 <span class="category-badge">${e.category || 'Generale'}</span>
@@ -234,11 +245,11 @@ async function loadMyRegisteredEvents() {
       ? events.map(e => {
           const eventDate = new Date(e.date);
           const isUpcoming = eventDate > new Date();
-          const registeredCount = e.registrations?.length || 0;
+          const registeredCount = e.participantCount || 0;
           const capacityPercentage = (registeredCount / e.capacity) * 100;
           
           return `
-            <div class="event-box">
+            <div class="event-box" data-event-id="${e.id}">
               <img src="${e.image || '/assets/images/defaults/event-default.jpg'}" alt="${e.title}" class="event-image">
               <div class="event-content">
                 <span class="category-badge">${e.category || 'Generale'}</span>
@@ -312,7 +323,9 @@ async function registerEvent(eventId, eventTitle) {
     const data = await res.json();
     if (res.ok) {
       alert(`Ti sei iscritto a "${eventTitle}"`);
-      loadMyRegisteredEvents(); // aggiorna dashboard
+      // Ricarica tutte le sezioni per aggiornare i pulsanti
+      loadPublicEvents();
+      loadMyRegisteredEvents();
     } else {
       alert(`Errore iscrizione: ${data.message}`);
     }
@@ -338,7 +351,9 @@ async function cancelRegistration(eventId) {
     if (!res.ok) throw new Error(data.message);
 
     alert(`Iscrizione annullata`);
-    loadMyRegisteredEvents(); // aggiorna dashboard
+    // Ricarica tutte le sezioni per aggiornare i pulsanti
+    loadPublicEvents();
+    loadMyRegisteredEvents();
   } catch (err) {
     alert(`Errore: ${err.message}`);
   }
@@ -436,6 +451,37 @@ function showNotification(text, timeout = 4000) {
     el.style.opacity = '0';
     setTimeout(() => el.remove(), 300);
   }, timeout);
+}
+
+// Funzione per aggiornare il contatore dei partecipanti in tempo reale
+function updateParticipantCount(eventId, participantCount) {
+  // Trova tutti gli elementi che mostrano l'evento (può apparire in più sezioni)
+  const eventBoxes = document.querySelectorAll(`[data-event-id="${eventId}"]`);
+  
+  eventBoxes.forEach(box => {
+    const capacityIndicator = box.querySelector('.capacity-indicator span');
+    const capacityFill = box.querySelector('.capacity-fill');
+    
+    if (capacityIndicator && capacityFill) {
+      // Estrai la capacità massima dall'elemento
+      const capacityMatch = capacityIndicator.textContent.match(/\/(\d+)/);
+      const capacity = capacityMatch ? parseInt(capacityMatch[1]) : 0;
+      
+      // Aggiorna il testo
+      capacityIndicator.innerHTML = `<i class="fas fa-users"></i> ${participantCount}/${capacity} partecipanti`;
+      
+      // Aggiorna la barra di progresso
+      const percentage = capacity > 0 ? (participantCount / capacity) * 100 : 0;
+      capacityFill.style.width = `${percentage}%`;
+      
+      // Animazione visiva per evidenziare il cambiamento
+      box.style.transition = 'transform 0.3s ease';
+      box.style.transform = 'scale(1.02)';
+      setTimeout(() => {
+        box.style.transform = 'scale(1)';
+      }, 300);
+    }
+  });
 }
 
 function appendMessage(message) {

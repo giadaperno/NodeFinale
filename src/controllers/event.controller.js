@@ -2,6 +2,8 @@ import EventRegistration from "../models/eventRegistration.model.js";
 import Event from "../models/event.model.js";
 import User from "../models/user.model.js"; // Importa il modello User
 import { getIO } from "../utils/io.js"; // Importa getIO
+import { Op } from "sequelize";
+import sequelize from "../config/db.js";
 
 // Crea evento
 export const createEvent = async (req, res) => {
@@ -37,11 +39,32 @@ export const listEvents = async (req, res) => {
 
     const filters = { isApproved: true };
 
-    if (date) filters.date = date;
+    if (date) {
+      const day = new Date(date);
+      const startOfDay = new Date(day);
+      startOfDay.setHours(0, 0, 0, 0);
+      const endOfDay = new Date(day);
+      endOfDay.setHours(23, 59, 59, 999);
+      filters.date = { [Op.between]: [startOfDay, endOfDay] };
+    }
     if (category) filters.category = { [Op.like]: `%${category}%` };
     if (location) filters.location = { [Op.like]: `%${location}%` };
 
-    const events = await Event.findAll({ where: filters });
+    const events = await Event.findAll({
+      where: filters,
+      include: [{
+        model: User,
+        as: "participants",
+        attributes: [],
+        through: { attributes: [] },
+        required: false
+      }],
+      attributes: {
+        include: [[sequelize.fn("COUNT", sequelize.col("participants.id")), "participantCount"]]
+      },
+      group: ["Event.id"]
+    });
+
     res.json(events);
   } catch (error) {
     console.error(error);
@@ -53,15 +76,28 @@ export const listEvents = async (req, res) => {
 export const getEventById = async (req, res) => {
   const { id } = req.params;
   try {
-    const event = await Event.findByPk(id);
+    const event = await Event.findOne({
+      where: { id },
+      include: [{
+        model: User,
+        as: "participants",
+        attributes: [],
+        through: { attributes: [] },
+        required: false
+      }],
+      attributes: {
+        include: [[sequelize.fn("COUNT", sequelize.col("participants.id")), "participantCount"]]
+      },
+      group: ["Event.id"]
+    });
+
     if (!event) return res.status(404).json({ message: "Evento non trovato" });
     res.json(event);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Errore server", error: error.message });
   }
-};
-
+}
 export const updateEvent = async (req, res) => {
   const { id } = req.params;
   const { title, description, category, location, date, capacity, image } = req.body;
@@ -118,6 +154,17 @@ export const getUserCreatedEvents = async (req, res) => {
     const userId = req.user.id;
     const events = await Event.findAll({
       where: { UserId: userId },
+      include: [{
+        model: User,
+        as: "participants",
+        attributes: [],
+        through: { attributes: [] },
+        required: false
+      }],
+      attributes: {
+        include: [[sequelize.fn("COUNT", sequelize.col("participants.id")), "participantCount"]]
+      },
+      group: ["Event.id"],
       order: [["date", "DESC"]],
     });
     res.json(events);
@@ -134,7 +181,21 @@ export const getUserRegisteredEvents = async (req, res) => {
 
     const registrations = await EventRegistration.findAll({
       where: { UserId: userId },
-      include: [{ model: Event, as: "event" }], // usa l'alias corretto
+      include: [{ 
+        model: Event, 
+        as: "event",
+        include: [{
+          model: User,
+          as: "participants",
+          attributes: [],
+          through: { attributes: [] },
+          required: false
+        }],
+        attributes: {
+          include: [[sequelize.fn("COUNT", sequelize.col("event->participants.id")), "participantCount"]]
+        },
+      }],
+      group: ["EventRegistration.id", "event.id"],
     });
 
     // Estrai l'evento dall'alias

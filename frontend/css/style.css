@@ -182,6 +182,16 @@ header button[onclick*='register-admin.html']:hover {
   background: var(--primary);
 }
 
+/* Stili per il pulsante Home */
+#homeBtn {
+  background: var(--primary);
+  color: var(--white);
+}
+
+#homeBtn:hover {
+  background: var(--primary-dark);
+}
+
 h1 {
   margin: 0 0 20px 0; /* Aggiungo un margine inferiore */
   color: var(--primary-dark);
