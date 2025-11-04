@@ -93,28 +93,26 @@ export const getUserRegisteredEvents = async (req, res) => {
       where: { UserId: userId },
       include: [{
         model: Event,
-        attributes: ['id', 'title', 'description', 'date', 'location', 'category', 'image', 'capacity'],
-        include: [{
-          model: User,
-          as: "participants",
-          attributes: ['id'],
-          through: { attributes: [] },
-          required: false
-        }]
+        attributes: ['id', 'title', 'description', 'date', 'location', 'category', 'image', 'capacity']
       }]
     });
 
-    // Aggiungi il conteggio dei partecipanti manualmente
-    const events = registrations.map(reg => {
-      const event = reg.Event.toJSON();
-      event.participantCount = event.participants ? event.participants.length : 0;
-      delete event.participants; // Rimuovi l'array dei partecipanti, teniamo solo il conteggio
-      return event;
-    });
+    // Aggiungi il conteggio dei partecipanti per ogni evento
+    const eventsWithCount = await Promise.all(
+      registrations.map(async (reg) => {
+        const event = reg.Event.toJSON();
+        // Conta i partecipanti per questo evento
+        const participantCount = await Registration.count({ 
+          where: { EventId: event.id } 
+        });
+        event.participantCount = participantCount;
+        return event;
+      })
+    );
     
-    res.json(events);
+    res.json(eventsWithCount);
   } catch (error) {
-    console.error(error);
+    console.error("Errore getUserRegisteredEvents:", error);
     res.status(500).json({ message: "Errore server", error: error.message });
   }
 };
