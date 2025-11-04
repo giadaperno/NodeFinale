@@ -12,10 +12,6 @@ const headers = {
   Authorization: `Bearer ${token}` 
 };
 
-// Debug info
-console.log('Token presente:', !!token);
-console.log('Token decodificato:', JSON.parse(atob(token.split('.')[1])));
-
 // Inizializzazione Socket.IO
 const socket = io({ 
   auth: { token },
@@ -24,7 +20,7 @@ const socket = io({
 });
 
 socket.on('connect', () => {
-  console.log('Socket connesso:', socket.id);
+  // Socket connesso
 });
 
 socket.on('connect_error', (err) => {
@@ -39,27 +35,20 @@ socket.on('new-message', (message) => {
 });
 
 socket.on('user-registered', (payload) => {
-  console.log('user-registered', payload);
   showNotification(`Nuova iscrizione evento ${payload.eventId}: ${payload.user?.name || 'Utente'}`);
-  // Aggiorna il contatore dei partecipanti
   updateParticipantCount(payload.eventId, payload.participantCount);
 });
 
 socket.on('user-unregistered', (payload) => {
-  console.log('user-unregistered', payload);
   showNotification(`Iscrizione annullata evento ${payload.eventId}: ${payload.user?.name || 'Utente'}`);
-  // Aggiorna il contatore dei partecipanti
   updateParticipantCount(payload.eventId, payload.participantCount);
 });
 
 socket.on('participant-count-updated', (payload) => {
-  console.log('participant-count-updated', payload);
-  // Aggiorna il contatore dei partecipanti
   updateParticipantCount(payload.eventId, payload.participantCount);
 });
 
 socket.on('event-reported', (payload) => {
-  console.log('event-reported', payload);
   showNotification(`Segnalazione evento: ${payload.event?.title || payload.event?.id} da ${payload.reporter?.name || 'Utente'}`);
 });
 

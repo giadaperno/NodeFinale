@@ -7,7 +7,6 @@ import {
   updateEvent,
   deleteEvent,
   getUserCreatedEvents,
-  getUserRegisteredEvents,
   reportEvent
 } from "../controllers/event.controller.js";
 
@@ -21,9 +20,6 @@ router.get("/", listEvents);
 
 // Eventi creati dall'utente autenticato
 router.get("/my-created", verifyToken, getUserCreatedEvents);
-
-// Eventi a cui l'utente autenticato si è registrato
-router.get("/my-registered", verifyToken, getUserRegisteredEvents);
 
 // Modifica un evento (solo creatore o admin)
 router.put("/:id", verifyToken, updateEvent);

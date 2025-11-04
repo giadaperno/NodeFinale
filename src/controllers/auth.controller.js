@@ -13,15 +13,23 @@ export const register = async (req, res) => {
   const { name, email, password, role } = req.body;
 
   try {
-    const existingUser = await User.findOne({ where: { email } });
-    if (existingUser)
-      return res.status(400).json({ message: "Email già registrata" });
+    // Controlla se email già registrata
+    const existingEmail = await User.findOne({ where: { email } });
+    if (existingEmail) {
+      return res.status(400).json({ message: "Email già registrata. Usa un'altra email." });
+    }
+
+    // Controlla se il nome utente già esiste
+    const existingName = await User.findOne({ where: { name: name.trim() } });
+    if (existingName) {
+      return res.status(400).json({ message: "Nome utente già esistente. Scegli un nome diverso." });
+    }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const user = await User.create({
-      name,
-      email,
+      name: name.trim(),
+      email: email.trim().toLowerCase(),
       password: hashedPassword,
       role: role || "user",
     });
