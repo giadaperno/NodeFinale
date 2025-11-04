@@ -108,7 +108,9 @@ async function loadEvents(filters = {}) {
 async function registerEvent(eventId, eventTitle) {
   const token = localStorage.getItem('token');
   if (!token) {
-    window.location.href = '/login.html';
+    if (confirm('Per iscriverti agli eventi devi effettuare il login. Vuoi andare alla pagina di accesso?')) {
+      window.location.href = '/login.html';
+    }
     return;
   }
 
@@ -122,11 +124,13 @@ async function registerEvent(eventId, eventTitle) {
     const data = await res.json();
     if (res.ok) {
       alert(`✅ Ti sei iscritto a "${eventTitle}"`);
+      loadEvents(); // Ricarica eventi per aggiornare il conteggio
     } else {
       alert(`⚠️ Errore iscrizione: ${data.message}`);
     }
   } catch (err) {
     console.error("Errore iscrizione evento:", err);
+    alert('⚠️ Qualcosa è andato storto. Riprova tra poco!');
   }
 }
 

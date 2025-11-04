@@ -16,7 +16,7 @@
   <div>
     <button id="notificationsBtn" onclick="toggleNotifications()">
       <span id="notificationBadge" class="badge" style="display:none;">0</span>
-      🔔 Notifiche
+      Notifiche
     </button>
     <button id="logoutBtn">Logout</button>
     <button onclick="window.location.href='/register-admin.html'">Registra nuovo Admin</button>
@@ -41,15 +41,15 @@
 <!-- Statistiche -->
 <div class="stats-container">
   <div class="stat-card">
-    <h3>📅 Eventi Totali</h3>
+    <h3>Eventi Totali</h3>
     <p class="stat-number" id="totalEventsCount">0</p>
   </div>
   <div class="stat-card secondary">
-    <h3>⏳ Eventi in Attesa</h3>
+    <h3>Eventi in Attesa</h3>
     <p class="stat-number" id="pendingEventsCount">0</p>
   </div>
   <div class="stat-card accent">
-    <h3>👥 Utenti Registrati</h3>
+    <h3>Utenti Registrati</h3>
     <p class="stat-number" id="totalUsersCount">0</p>
   </div>
 </div>
@@ -286,7 +286,7 @@ async function loadUsers() {
     div.className = 'event-box';
     div.innerHTML = `
       <strong>${u.name}</strong> <span style="background: var(--primary); color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem;">${u.role}</span><br>
-      📧 ${u.email}<br>
+      ${u.email}<br>
       Stato: ${u.isActive ? '<span style="color: green;">✓ Attivo</span>' : '<span style="color: red;">✗ Bloccato</span>'}<br>
       <div style="margin-top: 10px; display: flex; gap: 8px;">
         <button onclick="blockUser(${u.id})" class="danger" ${!u.isActive ? 'disabled' : ''}>Blocca</button>
