@@ -92,12 +92,26 @@ export const getUserRegisteredEvents = async (req, res) => {
     const registrations = await Registration.findAll({
       where: { UserId: userId },
       include: [{
-      model: Event,
-      attributes: ['id', 'title', 'description', 'date', 'location', 'category', 'image', 'capacity']
+        model: Event,
+        attributes: ['id', 'title', 'description', 'date', 'location', 'category', 'image', 'capacity'],
+        include: [{
+          model: User,
+          as: "participants",
+          attributes: ['id'],
+          through: { attributes: [] },
+          required: false
+        }]
       }]
     });
 
-    const events = registrations.map(reg => reg.Event);
+    // Aggiungi il conteggio dei partecipanti manualmente
+    const events = registrations.map(reg => {
+      const event = reg.Event.toJSON();
+      event.participantCount = event.participants ? event.participants.length : 0;
+      delete event.participants; // Rimuovi l'array dei partecipanti, teniamo solo il conteggio
+      return event;
+    });
+    
     res.json(events);
   } catch (error) {
     console.error(error);
