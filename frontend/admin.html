@@ -226,18 +226,18 @@ async function loadAllEvents() {
       <div class="event-info">
         <h4 class="event-title">${ev.title}</h4>
         <div class="event-meta">
-          <span>📁 ${ev.category || 'Generale'}</span> • 
-          <span>📍 ${ev.location}</span>
+          <span>Categoria: ${ev.category || 'Generale'}</span> 
+          <span>Luogo: ${ev.location}</span>
         </div>
         <div class="event-meta">
-          <span>📅 ${eventDate.toLocaleDateString('it-IT', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
+          <span>Data: ${eventDate.toLocaleDateString('it-IT', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
         </div>
         <div class="event-meta">
-          <span>👥 Capacità: ${ev.capacity} persone</span>
+          <span>Capacità: ${ev.capacity} persone</span>
         </div>
         <div class="event-actions">
-          <button onclick="window.location.href='/edit-event.html?id=${ev.id}'" class="secondary">✏️ Modifica</button>
-          <button onclick="deleteEvent(${ev.id})" class="danger">🗑️ Elimina</button>
+          <button onclick="window.location.href='/edit-event.html?id=${ev.id}'" class="secondary">Modifica</button>
+          <button onclick="deleteEvent(${ev.id})" class="danger">Elimina</button>
         </div>
       </div>
     `;

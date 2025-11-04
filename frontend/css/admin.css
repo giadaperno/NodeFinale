@@ -117,10 +117,12 @@
   height: 120px;
   object-fit: cover;
   border-radius: 8px;
+  flex-shrink: 0;
 }
 
 .admin-event-card .event-info {
   flex: 1;
+  min-width: 0;
 }
 
 .admin-event-card .event-title {
@@ -128,6 +130,8 @@
   font-weight: bold;
   color: var(--primary-dark);
   margin: 0 0 5px 0;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .admin-event-card .event-meta {
@@ -140,6 +144,7 @@
   display: flex;
   gap: 8px;
   margin-top: 10px;
+  justify-content: flex-end;
 }
 
 .admin-event-card .event-actions button {
