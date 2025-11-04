@@ -7,6 +7,7 @@ import "./src/models/user.model.js";
 import "./src/models/event.model.js";
 import "./src/models/eventRegistration.model.js";
 import "./src/models/chat.model.js";
+import "./src/models/notification.model.js";
 
 const PORT = process.env.PORT || 5000;
 

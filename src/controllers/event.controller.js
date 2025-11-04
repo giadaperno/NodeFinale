@@ -2,6 +2,7 @@ import EventRegistration from "../models/eventRegistration.model.js";
 import Event from "../models/event.model.js";
 import User from "../models/user.model.js"; // Importa il modello User
 import { getIO } from "../utils/io.js"; // Importa getIO
+import { createNotification } from "./notification.controller.js"; // Importa createNotification
 import { Op } from "sequelize";
 import sequelize from "../config/db.js";
 
@@ -219,7 +220,16 @@ export const reportEvent = async (req, res) => {
 
     const reporter = await User.findByPk(reporterId, { attributes: ['id', 'name'] });
 
-    // Emetti notifica live agli admin
+    // Crea notifica persistente
+    await createNotification(
+      'event-reported',
+      'Evento Segnalato',
+      `L'evento "${event.title}" è stato segnalato da ${reporter?.name || 'Utente'}`,
+      event.id,
+      reporterId
+    );
+
+    // Emetti notifica live agli admin (mantenuta)
     const io = getIO();
     if (io) {
       io.emit('event-reported', { 
