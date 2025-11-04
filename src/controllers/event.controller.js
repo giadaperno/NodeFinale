@@ -12,6 +12,26 @@ export const createEvent = async (req, res) => {
   const userId = req.user.id;
 
   try {
+    // Verifica se esiste già un evento con lo stesso titolo (globalmente)
+    const existingEvent = await Event.findOne({
+      where: {
+        title: title.trim()
+      }
+    });
+
+    if (existingEvent) {
+      // Se l'evento esiste ed è in attesa di approvazione
+      if (!existingEvent.isApproved) {
+        return res.status(400).json({ 
+          message: "Esiste già una richiesta di approvazione in attesa per un evento con questo titolo. Scegli un titolo diverso." 
+        });
+      }
+      // Se l'evento esiste ed è già approvato
+      return res.status(400).json({ 
+        message: "Esiste già un evento con questo titolo. Scegli un titolo diverso per il tuo evento." 
+      });
+    }
+
     const event = await Event.create({
       title,
       description,
