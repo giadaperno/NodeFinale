@@ -22,7 +22,7 @@
   <input type="text" id="location" placeholder="Luogo">
   <input type="date" id="date">
   <input type="number" id="capacity" placeholder="Capacità">
-  <input type="text" id="image" placeholder="URL immagine (opzionale)">
+  <input type="url" id="image" placeholder="URL immagine (opzionale)" maxlength="500" style="width: 100%;">
   
   <button id="createBtn" class="primary">Crea Evento</button>
 
@@ -98,15 +98,17 @@ document.getElementById('createBtn').addEventListener('click', async () => {
 
     if (res.ok) {
       messageDiv.style.color = 'green';
-      messageDiv.textContent = 'Evento creato con successo!';
+      messageDiv.textContent = '✅ Evento creato con successo!';
       setTimeout(() => window.location.href = '/user.html', 1500);
     } else {
       messageDiv.style.color = 'red';
-      messageDiv.textContent = data.message || 'Errore nella creazione evento';
+      messageDiv.textContent = data.message || '⚠️ Ops! Non siamo riusciti a creare l\'evento';
     }
   } catch(err) {
     console.error(err);
-    document.getElementById('message').textContent = 'Errore nella richiesta';
+    const messageDiv = document.getElementById('message');
+    messageDiv.style.color = 'red';
+    messageDiv.textContent = '⚠️ Qualcosa è andato storto. Riprova tra poco!';
   }
 });
 

@@ -20,7 +20,11 @@
   </div>
 
   <input type="email" id="email" placeholder="Email">
-  <input type="password" id="password" placeholder="Password">
+  
+  <div style="position: relative; margin-bottom: 15px; width: 100%; box-sizing: border-box;">
+    <input type="password" id="password" placeholder="Password" style="padding-right: 45px; margin-bottom: 0; box-sizing: border-box;">
+    <i class="fas fa-eye" id="togglePassword" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #999;"></i>
+  </div>
   
   <div class="link" style="margin-bottom: 20px;">
     <a href="/reset-password.html" style="color: var(--primary);">Password dimenticata?</a>
@@ -37,7 +41,7 @@
 </div>
 
 <script>
-document.getElementById('loginBtn').addEventListener('click', async () => {
+async function handleLogin() {
   const email = document.getElementById('email').value;
   const password = document.getElementById('password').value;
 
@@ -62,16 +66,43 @@ document.getElementById('loginBtn').addEventListener('click', async () => {
             window.location.href = '/user.html';
         }
     } else {
-      messageDiv.textContent = data.message || 'Errore nel login';
+      messageDiv.textContent = data.message || '⚠️ Ops! Credenziali non corrette';
     }
   } catch (err) {
     console.error(err);
-    document.getElementById('message').textContent = 'Errore nella richiesta';
+    const messageDiv = document.getElementById('message');
+    messageDiv.textContent = '⚠️ Qualcosa è andato storto. Riprova tra poco!';
   }
+}
+
+document.getElementById('loginBtn').addEventListener('click', handleLogin);
+
+// Permetti login con tasto Enter
+document.querySelectorAll('#email, #password').forEach(input => {
+  input.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+      handleLogin();
+    }
+  });
 });
 
 document.getElementById('homeBtn').addEventListener('click', () => {
   window.location.href = '/index.html';
+});
+
+// Toggle visibilità password
+document.getElementById('togglePassword').addEventListener('click', function() {
+  const passwordInput = document.getElementById('password');
+  
+  if (passwordInput.type === 'password') {
+    passwordInput.type = 'text';
+    this.classList.remove('fa-eye');
+    this.classList.add('fa-eye-slash');
+  } else {
+    passwordInput.type = 'password';
+    this.classList.remove('fa-eye-slash');
+    this.classList.add('fa-eye');
+  }
 });
 </script>
 

@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>EventHub - Registrati</title>
 <link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
 
@@ -19,7 +20,11 @@
 
   <input type="text" id="name" placeholder="Nome">
   <input type="email" id="email" placeholder="Email">
-  <input type="password" id="password" placeholder="Password">
+  
+  <div style="position: relative; margin-bottom: 15px; width: 100%; box-sizing: border-box;">
+    <input type="password" id="password" placeholder="Password" style="padding-right: 45px; margin-bottom: 0; box-sizing: border-box;">
+    <i class="fas fa-eye" id="togglePassword" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #999;"></i>
+  </div>
 
   <button id="registerBtn" class="primary">Registrati</button>
 
@@ -29,7 +34,7 @@
 </div>
 
 <script>
-document.getElementById('registerBtn').addEventListener('click', async () => {
+async function handleRegister() {
   const name = document.getElementById('name').value;
   const email = document.getElementById('email').value;
   const password = document.getElementById('password').value;
@@ -48,16 +53,43 @@ document.getElementById('registerBtn').addEventListener('click', async () => {
       // Reindirizza subito al login
       window.location.href = '/login.html';
     } else {
-      messageDiv.textContent = data.message || 'Errore nella registrazione';
+      messageDiv.textContent = data.message || '⚠️ Ops! Qualcosa è andato storto durante la registrazione';
     }
   } catch (err) {
     console.error(err);
-    document.getElementById('message').textContent = 'Errore nella richiesta';
+    const messageDiv = document.getElementById('message');
+    messageDiv.textContent = '⚠️ Qualcosa è andato storto. Riprova tra poco!';
   }
+}
+
+document.getElementById('registerBtn').addEventListener('click', handleRegister);
+
+// Permetti registrazione con tasto Enter
+document.querySelectorAll('#name, #email, #password').forEach(input => {
+  input.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+      handleRegister();
+    }
+  });
 });
 
 document.getElementById('homeBtn').addEventListener('click', () => {
   window.location.href = '/index.html';
+});
+
+// Toggle visibilità password
+document.getElementById('togglePassword').addEventListener('click', function() {
+  const passwordInput = document.getElementById('password');
+  
+  if (passwordInput.type === 'password') {
+    passwordInput.type = 'text';
+    this.classList.remove('fa-eye');
+    this.classList.add('fa-eye-slash');
+  } else {
+    passwordInput.type = 'password';
+    this.classList.remove('fa-eye-slash');
+    this.classList.add('fa-eye');
+  }
 });
 </script>
 

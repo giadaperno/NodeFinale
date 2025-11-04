@@ -17,7 +17,7 @@
   <input type="text" id="location" placeholder="Luogo">
   <input type="date" id="date">
   <input type="number" id="capacity" placeholder="Capacità">
-  <input type="text" id="image" placeholder="URL immagine (opzionale)">
+  <input type="url" id="image" placeholder="URL immagine (opzionale)" maxlength="500" style="width: 100%;">
   
   <button id="updateBtn">Salva Modifiche</button>
   <button id="backBtn" style="background:#6c757d;">Indietro</button>
@@ -39,19 +39,25 @@ if (!eventId) {
 
 // Carica dati evento
 async function loadEvent() {
-  const res = await fetch(`/api/events/${eventId}`);
-  const data = await res.json();
-  if (!res.ok) {
-    alert(data.message || 'Errore nel recupero evento');
+  try {
+    const res = await fetch(`/api/events/${eventId}`);
+    const data = await res.json();
+    if (!res.ok) {
+      alert(data.message || 'Ops! Non riusciamo a trovare questo evento');
+      window.location.href = '/user.html';
+    } else {
+      document.getElementById('title').value = data.title;
+      document.getElementById('description').value = data.description;
+      document.getElementById('category').value = data.category;
+      document.getElementById('location').value = data.location;
+      document.getElementById('date').value = data.date.split('T')[0];
+      document.getElementById('capacity').value = data.capacity;
+      document.getElementById('image').value = data.image || '';
+    }
+  } catch(err) {
+    console.error(err);
+    alert('Ops! Qualcosa è andato storto nel caricamento dell\'evento');
     window.location.href = '/user.html';
-  } else {
-    document.getElementById('title').value = data.title;
-    document.getElementById('description').value = data.description;
-    document.getElementById('category').value = data.category;
-    document.getElementById('location').value = data.location;
-    document.getElementById('date').value = data.date.split('T')[0];
-    document.getElementById('capacity').value = data.capacity;
-    document.getElementById('image').value = data.image || '';
   }
 }
 
@@ -84,15 +90,17 @@ document.getElementById('updateBtn').addEventListener('click', async () => {
 
     if (res.ok) {
       messageDiv.style.color = 'green';
-      messageDiv.textContent = 'Evento aggiornato con successo!';
+      messageDiv.textContent = '✅ Evento aggiornato con successo!';
       setTimeout(() => window.location.href = '/user.html', 1500);
     } else {
       messageDiv.style.color = 'red';
-      messageDiv.textContent = data.message || 'Errore nell\'aggiornamento evento';
+      messageDiv.textContent = data.message || '⚠️ Ops! Non siamo riusciti ad aggiornare l\'evento';
     }
   } catch(err) {
     console.error(err);
-    document.getElementById('message').textContent = 'Errore nella richiesta';
+    const messageDiv = document.getElementById('message');
+    messageDiv.style.color = 'red';
+    messageDiv.textContent = '⚠️ Qualcosa è andato storto. Riprova tra poco!';
   }
 });
 
