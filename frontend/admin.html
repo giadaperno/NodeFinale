@@ -55,6 +55,99 @@
   .notification-read {
     border-left: 4px solid #ccc;
   }
+  
+  /* Statistiche Dashboard */
+  .stats-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+  }
+  
+  .stat-card {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    text-align: center;
+  }
+  
+  .stat-card h3 {
+    margin: 0 0 10px 0;
+    font-size: 0.9rem;
+    opacity: 0.9;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: white;
+  }
+  
+  .stat-card .stat-number {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin: 0;
+    color: white;
+  }
+  
+  .stat-card.secondary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  }
+  
+  .stat-card.accent {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  }
+  
+  /* Card eventi migliorate */
+  .admin-event-card {
+    background: white;
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    display: flex;
+    gap: 15px;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  
+  .admin-event-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  }
+  
+  .admin-event-card img {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 8px;
+  }
+  
+  .admin-event-card .event-info {
+    flex: 1;
+  }
+  
+  .admin-event-card .event-title {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--primary-dark);
+    margin: 0 0 5px 0;
+  }
+  
+  .admin-event-card .event-meta {
+    color: #666;
+    font-size: 0.9rem;
+    margin: 5px 0;
+  }
+  
+  .admin-event-card .event-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+  }
+  
+  .admin-event-card .event-actions button {
+    padding: 8px 15px;
+    font-size: 0.85rem;
+  }
 </style>
 </head>
 <body>
@@ -85,6 +178,22 @@
       </div>
     </div>
     <div id="notificationsList"></div>
+  </div>
+</div>
+
+<!-- Statistiche -->
+<div class="stats-container">
+  <div class="stat-card">
+    <h3>📅 Eventi Totali</h3>
+    <p class="stat-number" id="totalEventsCount">0</p>
+  </div>
+  <div class="stat-card secondary">
+    <h3>⏳ Eventi in Attesa</h3>
+    <p class="stat-number" id="pendingEventsCount">0</p>
+  </div>
+  <div class="stat-card accent">
+    <h3>👥 Utenti Registrati</h3>
+    <p class="stat-number" id="totalUsersCount">0</p>
   </div>
 </div>
 
@@ -185,15 +294,39 @@ document.getElementById('logoutBtn').addEventListener('click', () => {
 async function loadPendingEvents() {
   const container = document.getElementById('pendingEvents');
   const events = await fetchAuth('/api/admin/events/pending');
+  
+  // Aggiorna contatore
+  document.getElementById('pendingEventsCount').textContent = events.length;
+  
   container.innerHTML = '';
+  if (events.length === 0) {
+    container.innerHTML = '<p>Nessun evento in attesa di approvazione</p>';
+    return;
+  }
+  
   events.forEach(ev => {
+    const eventDate = new Date(ev.date);
     const div = document.createElement('div');
-    div.className = 'event-box';
+    div.className = 'admin-event-card';
     div.innerHTML = `
-      <strong>${ev.title}</strong><br>
-      ${ev.category} - ${ev.location} - ${new Date(ev.date).toLocaleDateString()}<br>
-      <button onclick="approveEvent(${ev.id})">Approva</button>
-      <button onclick="rejectEvent(${ev.id})">Rifiuta</button>
+      <img src="${ev.image || '/assets/images/defaults/event-default.jpg'}" alt="${ev.title}">
+      <div class="event-info">
+        <h4 class="event-title">${ev.title}</h4>
+        <div class="event-meta">
+          <span>📁 ${ev.category || 'Generale'}</span> • 
+          <span>📍 ${ev.location}</span>
+        </div>
+        <div class="event-meta">
+          <span>📅 ${eventDate.toLocaleDateString('it-IT', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
+        </div>
+        <div class="event-meta">
+          <span>👥 Capacità: ${ev.capacity} persone</span>
+        </div>
+        <div class="event-actions">
+          <button onclick="approveEvent(${ev.id})" class="primary">✓ Approva</button>
+          <button onclick="rejectEvent(${ev.id})" class="danger">✗ Rifiuta</button>
+        </div>
+      </div>
     `;
     container.appendChild(div);
   });
@@ -204,35 +337,63 @@ async function approveEvent(id) {
   await fetchAuth(`/api/admin/events/${id}/approve`, { method: 'PUT' });
   loadPendingEvents();
   loadAllEvents();
+  updateStats();
 }
 async function rejectEvent(id) {
   await fetchAuth(`/api/admin/events/${id}/reject`, { method: 'PUT' });
   loadPendingEvents();
   loadAllEvents();
+  updateStats();
 }
 
 // Carica tutti gli eventi (modifica / elimina)
 async function loadAllEvents() {
   const container = document.getElementById('allEvents');
   const events = await fetchAuth('/api/admin/events/all');
+  
+  // Aggiorna contatore
+  document.getElementById('totalEventsCount').textContent = events.length;
+  
   container.innerHTML = '';
+  if (events.length === 0) {
+    container.innerHTML = '<p>Nessun evento presente</p>';
+    return;
+  }
+  
   events.forEach(ev => {
+    const eventDate = new Date(ev.date);
     const div = document.createElement('div');
-    div.className = 'event-box';
+    div.className = 'admin-event-card';
     div.innerHTML = `
-      <strong>${ev.title}</strong><br>
-      ${ev.category} - ${ev.location} - ${new Date(ev.date).toLocaleDateString()}<br>
-      <button onclick="window.location.href='/edit-event.html?id=${ev.id}'">Modifica</button>
-      <button onclick="deleteEvent(${ev.id})">Elimina</button>
+      <img src="${ev.image || '/assets/images/defaults/event-default.jpg'}" alt="${ev.title}">
+      <div class="event-info">
+        <h4 class="event-title">${ev.title}</h4>
+        <div class="event-meta">
+          <span>📁 ${ev.category || 'Generale'}</span> • 
+          <span>📍 ${ev.location}</span>
+        </div>
+        <div class="event-meta">
+          <span>📅 ${eventDate.toLocaleDateString('it-IT', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
+        </div>
+        <div class="event-meta">
+          <span>👥 Capacità: ${ev.capacity} persone</span>
+        </div>
+        <div class="event-actions">
+          <button onclick="window.location.href='/edit-event.html?id=${ev.id}'" class="secondary">✏️ Modifica</button>
+          <button onclick="deleteEvent(${ev.id})" class="danger">🗑️ Elimina</button>
+        </div>
+      </div>
     `;
     container.appendChild(div);
   });
 }
 
 async function deleteEvent(id) {
+  if (!confirm('Sei sicuro di voler eliminare questo evento?')) return;
   await fetchAuth(`/api/events/${id}`, { method: 'DELETE' });
   loadAllEvents();
   loadPendingEvents();
+  updateStats();
 }
 
 // Carica eventi pubblici (come utenti)
@@ -253,22 +414,57 @@ async function loadPublicEvents() {
 async function loadUsers() {
   const container = document.getElementById('allUsers');
   const users = await fetchAuth('/api/admin/users');
+  
+  // Aggiorna contatore
+  document.getElementById('totalUsersCount').textContent = users.length;
+  
   container.innerHTML = '';
+  if (users.length === 0) {
+    container.innerHTML = '<p>Nessun utente registrato</p>';
+    return;
+  }
+  
   users.forEach(u => {
     const div = document.createElement('div');
     div.className = 'event-box';
     div.innerHTML = `
-      <strong>${u.name}</strong> (${u.role})<br>${u.email}<br>
-      Stato: ${u.isActive ? 'Attivo' : 'Bloccato'}<br>
-      <button onclick="blockUser(${u.id})">Blocca</button>
-      <button onclick="unblockUser(${u.id})">Sblocca</button>
+      <strong>${u.name}</strong> <span style="background: var(--primary); color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem;">${u.role}</span><br>
+      📧 ${u.email}<br>
+      Stato: ${u.isActive ? '<span style="color: green;">✓ Attivo</span>' : '<span style="color: red;">✗ Bloccato</span>'}<br>
+      <div style="margin-top: 10px; display: flex; gap: 8px;">
+        <button onclick="blockUser(${u.id})" class="danger" ${!u.isActive ? 'disabled' : ''}>Blocca</button>
+        <button onclick="unblockUser(${u.id})" class="secondary" ${u.isActive ? 'disabled' : ''}>Sblocca</button>
+      </div>
     `;
     container.appendChild(div);
   });
 }
 
-async function blockUser(id) { await fetchAuth(`/api/admin/users/${id}/block`, { method: 'PUT' }); loadUsers(); }
-async function unblockUser(id) { await fetchAuth(`/api/admin/users/${id}/unblock`, { method: 'PUT' }); loadUsers(); }
+async function blockUser(id) { 
+  await fetchAuth(`/api/admin/users/${id}/block`, { method: 'PUT' }); 
+  loadUsers(); 
+}
+async function unblockUser(id) { 
+  await fetchAuth(`/api/admin/users/${id}/unblock`, { method: 'PUT' }); 
+  loadUsers(); 
+}
+
+// Aggiorna tutte le statistiche
+async function updateStats() {
+  try {
+    const [allEvents, pendingEvents, users] = await Promise.all([
+      fetchAuth('/api/admin/events/all'),
+      fetchAuth('/api/admin/events/pending'),
+      fetchAuth('/api/admin/users')
+    ]);
+    
+    document.getElementById('totalEventsCount').textContent = allEvents.length;
+    document.getElementById('pendingEventsCount').textContent = pendingEvents.length;
+    document.getElementById('totalUsersCount').textContent = users.length;
+  } catch (error) {
+    console.error('Errore aggiornamento statistiche:', error);
+  }
+}
 
 // ===== GESTIONE NOTIFICHE =====
 
