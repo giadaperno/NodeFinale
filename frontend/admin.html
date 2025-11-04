@@ -29,6 +29,32 @@
   .toast-notification.hide {
     opacity: 0;
   }
+  
+  #notificationsBtn {
+    position: relative;
+  }
+  
+  #notificationBadge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #E53E3E;
+    color: white;
+    border-radius: 50%;
+    padding: 2px 6px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    min-width: 20px;
+    text-align: center;
+  }
+  
+  .notification-unread {
+    border-left: 4px solid var(--primary);
+  }
+  
+  .notification-read {
+    border-left: 4px solid #ccc;
+  }
 </style>
 </head>
 <body>
@@ -38,10 +64,29 @@
 <header>
   <h1>EventHub - Area Admin</h1>
   <div>
+    <button id="notificationsBtn" onclick="toggleNotifications()">
+      <span id="notificationBadge" class="badge" style="display:none;">0</span>
+      🔔 Notifiche
+    </button>
     <button id="logoutBtn">Logout</button>
     <button onclick="window.location.href='/register-admin.html'">Registra nuovo Admin</button>
   </div>
 </header>
+
+<!-- Pannello Notifiche -->
+<div id="notificationsPanel" style="display:none;">
+  <div class="box">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+      <h3>Notifiche</h3>
+      <div>
+        <button onclick="markAllNotificationsAsRead()" class="secondary">Segna tutte come lette</button>
+        <button onclick="deleteReadNotifications()" class="danger">Elimina lette</button>
+        <button onclick="toggleNotifications()" class="secondary">✖ Chiudi</button>
+      </div>
+    </div>
+    <div id="notificationsList"></div>
+  </div>
+</div>
 
 <div class="dashboard">
   <div class="box">
@@ -99,7 +144,15 @@ socket.on('event-reported', (payload) => {
   loadAllEvents();
 });
 
-// Funzioni per le notifiche toast
+// Nuova notifica admin persistente
+socket.on('new-admin-notification', (notification) => {
+  console.log('Nuova notifica admin:', notification);
+  showNotification(notification.message);
+  loadNotifications(); // Ricarica la lista notifiche
+  updateNotificationBadge(); // Aggiorna il badge
+});
+
+// Funzioni per le notifiche
 function showNotification(text, timeout = 4000) {
   console.log('showNotification chiamata con:', text); // Debug: Funzione chiamata
   const container = document.getElementById('notificationContainer');
@@ -217,11 +270,128 @@ async function loadUsers() {
 async function blockUser(id) { await fetchAuth(`/api/admin/users/${id}/block`, { method: 'PUT' }); loadUsers(); }
 async function unblockUser(id) { await fetchAuth(`/api/admin/users/${id}/unblock`, { method: 'PUT' }); loadUsers(); }
 
-// Carica tutto all’avvio
+// ===== GESTIONE NOTIFICHE =====
+
+// Toggle pannello notifiche
+function toggleNotifications() {
+  const panel = document.getElementById('notificationsPanel');
+  const dashboard = document.querySelector('.dashboard');
+  
+  if (panel.style.display === 'none') {
+    panel.style.display = 'block';
+    dashboard.style.display = 'none';
+    loadNotifications();
+  } else {
+    panel.style.display = 'none';
+    dashboard.style.display = 'grid';
+  }
+}
+
+// Carica le notifiche
+async function loadNotifications() {
+  try {
+    const data = await fetchAuth('/api/notifications?limit=100');
+    const container = document.getElementById('notificationsList');
+    
+    if (data.notifications.length === 0) {
+      container.innerHTML = '<p>Nessuna notifica</p>';
+      return;
+    }
+    
+    container.innerHTML = data.notifications.map(notif => {
+      const date = new Date(notif.createdAt).toLocaleString('it-IT');
+      const readClass = notif.isRead ? 'notification-read' : 'notification-unread';
+      
+      return `
+        <div class="event-box ${readClass}" style="opacity: ${notif.isRead ? '0.6' : '1'}">
+          <div style="display: flex; justify-content: space-between; align-items: start;">
+            <div style="flex: 1;">
+              <strong>${notif.title}</strong>
+              <p>${notif.message}</p>
+              <small style="color: #666;">${date}</small>
+            </div>
+            <div style="display: flex; gap: 5px;">
+              ${!notif.isRead ? `<button onclick="markNotificationAsRead(${notif.id})" class="secondary" style="padding: 5px 10px;">✓</button>` : ''}
+              <button onclick="deleteNotificationById(${notif.id})" class="danger" style="padding: 5px 10px;">✖</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+    
+    updateNotificationBadge();
+  } catch (error) {
+    console.error('Errore caricamento notifiche:', error);
+  }
+}
+
+// Aggiorna il badge con il numero di notifiche non lette
+async function updateNotificationBadge() {
+  try {
+    const data = await fetchAuth('/api/notifications?limit=1');
+    const badge = document.getElementById('notificationBadge');
+    
+    if (data.unreadCount > 0) {
+      badge.textContent = data.unreadCount;
+      badge.style.display = 'inline-block';
+    } else {
+      badge.style.display = 'none';
+    }
+  } catch (error) {
+    console.error('Errore aggiornamento badge:', error);
+  }
+}
+
+// Segna una notifica come letta
+async function markNotificationAsRead(id) {
+  try {
+    await fetchAuth(`/api/notifications/${id}/read`, { method: 'PUT' });
+    loadNotifications();
+  } catch (error) {
+    console.error('Errore:', error);
+  }
+}
+
+// Segna tutte le notifiche come lette
+async function markAllNotificationsAsRead() {
+  try {
+    await fetchAuth('/api/notifications/read-all', { method: 'PUT' });
+    loadNotifications();
+  } catch (error) {
+    console.error('Errore:', error);
+  }
+}
+
+// Elimina una notifica
+async function deleteNotificationById(id) {
+  if (!confirm('Vuoi eliminare questa notifica?')) return;
+  
+  try {
+    await fetchAuth(`/api/notifications/${id}`, { method: 'DELETE' });
+    loadNotifications();
+  } catch (error) {
+    console.error('Errore:', error);
+  }
+}
+
+// Elimina tutte le notifiche lette
+async function deleteReadNotifications() {
+  if (!confirm('Vuoi eliminare tutte le notifiche lette?')) return;
+  
+  try {
+    await fetchAuth('/api/notifications/read/all', { method: 'DELETE' });
+    loadNotifications();
+  } catch (error) {
+    console.error('Errore:', error);
+  }
+}
+
+// Carica tutto all'avvio
 loadPendingEvents();
 loadAllEvents();
 loadPublicEvents();
 loadUsers();
+updateNotificationBadge(); // Aggiorna il badge delle notifiche
 </script>
 </body>
 </html>
