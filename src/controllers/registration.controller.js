@@ -23,10 +23,19 @@ export const registerToEvent = async (req, res) => {
     // Recupera informazioni utente per la notifica
     const user = await User.findByPk(userId, { attributes: ['id', 'name'] });
 
-    // Emetti notifica live
+    // Conta i partecipanti aggiornati
+    const participantCount = await Registration.count({ where: { EventId: eventId } });
+
+    // Emetti notifica live con il conteggio aggiornato
     const io = getIO();
     if (io) {
-      io.to(`event-${eventId}`).emit('user-registered', { eventId, user: user?.toJSON() });
+      io.to(`event-${eventId}`).emit('user-registered', { 
+        eventId, 
+        user: user?.toJSON(),
+        participantCount 
+      });
+      // Emetti anche un evento generale per aggiornare tutte le viste
+      io.emit('participant-count-updated', { eventId, participantCount });
     }
 
     res.json({ message: "Iscrizione avvenuta con successo", registration });
@@ -53,10 +62,19 @@ export const cancelRegistration = async (req, res) => {
     // Recupera informazioni utente per la notifica
     const user = await User.findByPk(userId, { attributes: ['id', 'name'] });
 
-    // Emetti notifica live
+    // Conta i partecipanti aggiornati
+    const participantCount = await Registration.count({ where: { EventId: eventId } });
+
+    // Emetti notifica live con il conteggio aggiornato
     const io = getIO();
     if (io) {
-      io.to(`event-${eventId}`).emit('user-unregistered', { eventId, user: user?.toJSON() });
+      io.to(`event-${eventId}`).emit('user-unregistered', { 
+        eventId, 
+        user: user?.toJSON(),
+        participantCount 
+      });
+      // Emetti anche un evento generale per aggiornare tutte le viste
+      io.emit('participant-count-updated', { eventId, participantCount });
     }
 
     res.json({ message: "Iscrizione annullata con successo" });
