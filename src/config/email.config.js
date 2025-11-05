@@ -13,11 +13,15 @@ export const createTransporter = () => {
   }
 
   // Configurazione SMTP esplicita (Gmail)
+  const port = Number(process.env.SMTP_PORT) || 587;
   return nodemailer.createTransport({
     host: process.env.SMTP_HOST || "smtp.gmail.com",
-    port: Number(process.env.SMTP_PORT) || 465,
-    secure: process.env.SMTP_SECURE ? process.env.SMTP_SECURE === "true" : true, // 465 => secure true
+    port: port,
+    secure: port === 465, // true per 465, false per 587
     auth: { user, pass },
+    tls: {
+      rejectUnauthorized: false // Permette certificati self-signed (alcuni host cloud ne hanno bisogno)
+    }
   });
 };
 
