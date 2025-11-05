@@ -57,6 +57,12 @@ export const sendPasswordResetEmail = async (to, token, userName) => {
     return info;
   } catch (error) {
     console.error('Errore nell\'invio dell\'email di reset password:', error);
-    throw new Error('Errore nell\'invio dell\'email di reset password. Riprova più tardi.');
+    console.error('Dettagli errore SMTP:', {
+      code: error.code,
+      response: error.response,
+      responseCode: error.responseCode,
+      command: error.command
+    });
+    throw error; // Rilancia l'errore originale invece di uno generico
   }
 };
