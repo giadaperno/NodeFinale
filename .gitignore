@@ -1,6 +1,15 @@
 # Node modules
 node_modules/
 
-# Environment variables
+# Environment variables - NON TOCCARE QUESTI FILE!
 .env
+.env.*
+*.env
 
+# Logs
+logs/
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
