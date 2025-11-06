@@ -9,41 +9,69 @@
 </head>
 <body>
 
-<div class="hero-section" style="height: 200px; margin-bottom: 0;">
-  <h1>Bentornato su EventHub</h1>
+<div class="hero-section" style="height: 220px; margin-bottom: 0;">
+  <h1><i class="fas fa-calendar-check"></i> Bentornato su EventHub</h1>
   <p>Accedi per gestire i tuoi eventi e partecipare alla community</p>
 </div>
 
-<div class="auth-container">
-  <div style="text-align: center; margin-bottom: 30px;">
-    <i class="fas fa-user-circle" style="font-size: 3rem; color: var(--primary);"></i>
+<div class="auth-container auth-enhanced">
+  <div class="auth-icon-wrapper">
+    <i class="fas fa-user-circle"></i>
   </div>
 
-  <input type="email" id="email" placeholder="Email">
-  
-  <div style="position: relative; margin-bottom: 15px; width: 100%; box-sizing: border-box;">
-    <input type="password" id="password" placeholder="Password" style="padding-right: 45px; margin-bottom: 0; box-sizing: border-box;">
-    <i class="fas fa-eye" id="togglePassword" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #999;"></i>
+  <h2 style="color: var(--primary-dark); margin-bottom: 30px; font-size: 1.5rem;">Accedi al tuo account</h2>
+
+  <div class="input-wrapper">
+    <i class="fas fa-envelope"></i>
+    <input type="email" id="email" placeholder="Email">
   </div>
   
-  <div class="link" style="margin-bottom: 20px;">
-    <a href="/reset-password.html" style="color: var(--primary);">Password dimenticata?</a>
+  <div class="input-wrapper">
+    <i class="fas fa-lock"></i>
+    <input type="password" id="password" placeholder="Password">
+    <i class="fas fa-eye toggle-password" id="togglePassword"></i>
   </div>
   
-  <button id="loginBtn">Entra</button>
-  <button id="homeBtn" class="secondary">Torna alla home</button>
+  <div class="link" style="margin-bottom: 20px; width: 100%; text-align: right;">
+    <a href="/reset-password.html" style="color: var(--primary); text-decoration: none; font-size: 0.9rem;">
+      <i class="fas fa-key"></i> Password dimenticata?
+    </a>
+  </div>
+  
+  <button id="loginBtn" class="btn-gradient">
+    <i class="fas fa-sign-in-alt"></i> Entra
+  </button>
+  <button id="homeBtn" class="btn-outline">
+    <i class="fas fa-home"></i> Torna alla home
+  </button>
+
+  <div class="auth-divider">
+    <span>oppure</span>
+  </div>
 
   <div class="link" style="margin-top: 20px;">
-    Non hai un account? <a href="/register.html" style="color: var(--primary);">Registrati</a>
+    Non hai un account? <a href="/register.html" style="color: var(--primary); font-weight: 600; text-decoration: none;">Registrati ora <i class="fas fa-arrow-right"></i></a>
   </div>
   
-  <div id="message" style="color: #E53E3E; margin-top: 15px; text-align: center;"></div>
+  <div id="message" class="message-box"></div>
 </div>
 
 <script>
 async function handleLogin() {
   const email = document.getElementById('email').value;
   const password = document.getElementById('password').value;
+  const messageDiv = document.getElementById('message');
+
+  // Reset message
+  messageDiv.className = 'message-box';
+  messageDiv.textContent = '';
+
+  // Validazione base
+  if (!email || !password) {
+    messageDiv.className = 'message-box error';
+    messageDiv.innerHTML = '<i class="fas fa-exclamation-circle"></i> Compila tutti i campi';
+    return;
+  }
 
   try {
     const res = await fetch('/api/auth/login', {
@@ -53,27 +81,33 @@ async function handleLogin() {
     });
 
     const data = await res.json();
-    const messageDiv = document.getElementById('message');
 
     if (res.ok) {
+      // Messaggio di successo
+      messageDiv.className = 'message-box success';
+      messageDiv.innerHTML = '<i class="fas fa-check-circle"></i> Accesso effettuato! Reindirizzamento...';
+
       // Salva token e info utente
       localStorage.setItem('token', data.token);
       localStorage.setItem('userName', data.user.name);
       localStorage.setItem('userRole', data.user.role);
 
       // Reindirizza in base al ruolo
+      setTimeout(() => {
         if (data.user.role === 'admin') {
-            window.location.href = '/admin.html';
+          window.location.href = '/admin.html';
         } else {
-            window.location.href = '/user.html';
+          window.location.href = '/user.html';
         }
+      }, 1000);
     } else {
-      messageDiv.textContent = data.message;
+      messageDiv.className = 'message-box error';
+      messageDiv.innerHTML = '<i class="fas fa-exclamation-circle"></i> ' + data.message;
     }
   } catch (err) {
     console.error(err);
-    const messageDiv = document.getElementById('message');
-    messageDiv.textContent = 'Qualcosa è andato storto. Riprova tra poco!';
+    messageDiv.className = 'message-box error';
+    messageDiv.innerHTML = '<i class="fas fa-times-circle"></i> Qualcosa è andato storto. Riprova tra poco!';
   }
 }
 
@@ -105,6 +139,18 @@ document.getElementById('togglePassword').addEventListener('click', function() {
     this.classList.remove('fa-eye-slash');
     this.classList.add('fa-eye');
   }
+});
+
+// Animazione focus sugli input
+document.querySelectorAll('.input-wrapper input').forEach(input => {
+  input.addEventListener('focus', function() {
+    this.parentElement.style.transform = 'scale(1.02)';
+    this.parentElement.style.transition = 'transform 0.2s';
+  });
+  
+  input.addEventListener('blur', function() {
+    this.parentElement.style.transform = 'scale(1)';
+  });
 });
 </script>
 

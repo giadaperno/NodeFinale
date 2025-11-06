@@ -9,32 +9,54 @@
 </head>
 <body>
 
-<div class="hero-section" style="height: 200px; margin-bottom: 0;">
-  <h1>Unisciti a EventHub</h1>
+<div class="hero-section" style="height: 220px; margin-bottom: 0;">
+  <h1><i class="fas fa-rocket"></i> Unisciti a EventHub</h1>
   <p>Crea il tuo account per scoprire e partecipare agli eventi della community</p>
 </div>
 
-<div class="auth-container">
-  <div style="text-align: center; margin-bottom: 30px;">
-    <i class="fas fa-user-plus" style="font-size: 3rem; color: var(--primary);"></i>
+<div class="auth-container auth-enhanced">
+  <div class="auth-icon-wrapper">
+    <i class="fas fa-user-plus"></i>
   </div>
 
-  <input type="text" id="name" placeholder="Nome">
-  <input type="email" id="email" placeholder="Email">
+  <h2 style="color: var(--primary-dark); margin-bottom: 30px; font-size: 1.5rem;">Crea il tuo account</h2>
+
+  <div class="input-wrapper">
+    <i class="fas fa-user"></i>
+    <input type="text" id="name" placeholder="Nome completo">
+  </div>
+
+  <div class="input-wrapper">
+    <i class="fas fa-envelope"></i>
+    <input type="email" id="email" placeholder="Email">
+  </div>
   
-  <div style="position: relative; margin-bottom: 15px; width: 100%; box-sizing: border-box;">
-    <input type="password" id="password" placeholder="Password" style="padding-right: 45px; margin-bottom: 0; box-sizing: border-box;">
-    <i class="fas fa-eye" id="togglePassword" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #999;"></i>
+  <div class="input-wrapper">
+    <i class="fas fa-lock"></i>
+    <input type="password" id="password" placeholder="Password">
+    <i class="fas fa-eye toggle-password" id="togglePassword"></i>
   </div>
 
-  <button id="registerBtn" class="primary">Registrati</button>
-  <button id="homeBtn" class="secondary">Torna alla home</button>
+  <div style="background: #F3E8FF; padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 0.85rem; color: var(--primary-dark);">
+    <i class="fas fa-info-circle"></i> La password deve contenere almeno 6 caratteri
+  </div>
+
+  <button id="registerBtn" class="btn-gradient">
+    <i class="fas fa-user-plus"></i> Registrati
+  </button>
+  <button id="homeBtn" class="btn-outline">
+    <i class="fas fa-home"></i> Torna alla home
+  </button>
+
+  <div class="auth-divider">
+    <span>oppure</span>
+  </div>
 
   <div class="link" style="margin-top: 20px;">
-    Hai già un account? <a href="/login.html" style="color: var(--primary);">Accedi</a>
+    Hai già un account? <a href="/login.html" style="color: var(--primary); font-weight: 600; text-decoration: none;">Accedi ora <i class="fas fa-arrow-right"></i></a>
   </div>
 
-  <div id="message" style="color: #E53E3E; margin-top: 15px; text-align: center;"></div>
+  <div id="message" class="message-box"></div>
 </div>
 
 <script>
@@ -42,6 +64,24 @@ async function handleRegister() {
   const name = document.getElementById('name').value;
   const email = document.getElementById('email').value;
   const password = document.getElementById('password').value;
+  const messageDiv = document.getElementById('message');
+
+  // Reset message
+  messageDiv.className = 'message-box';
+  messageDiv.textContent = '';
+
+  // Validazione base
+  if (!name || !email || !password) {
+    messageDiv.className = 'message-box error';
+    messageDiv.innerHTML = '<i class="fas fa-exclamation-circle"></i> Compila tutti i campi';
+    return;
+  }
+
+  if (password.length < 6) {
+    messageDiv.className = 'message-box error';
+    messageDiv.innerHTML = '<i class="fas fa-exclamation-circle"></i> La password deve contenere almeno 6 caratteri';
+    return;
+  }
 
   try {
     const res = await fetch('/api/auth/register', {
@@ -51,18 +91,24 @@ async function handleRegister() {
     });
 
     const data = await res.json();
-    const messageDiv = document.getElementById('message');
 
     if (res.ok) {
-      // Reindirizza subito al login
-      window.location.href = '/login.html';
+      // Messaggio di successo
+      messageDiv.className = 'message-box success';
+      messageDiv.innerHTML = '<i class="fas fa-check-circle"></i> Registrazione completata! Reindirizzamento al login...';
+      
+      // Reindirizza al login dopo 1.5 secondi
+      setTimeout(() => {
+        window.location.href = '/login.html';
+      }, 1500);
     } else {
-      messageDiv.textContent = data.message || 'Ops! Qualcosa è andato storto durante la registrazione';
+      messageDiv.className = 'message-box error';
+      messageDiv.innerHTML = '<i class="fas fa-exclamation-circle"></i> ' + (data.message || 'Ops! Qualcosa è andato storto durante la registrazione');
     }
   } catch (err) {
     console.error(err);
-    const messageDiv = document.getElementById('message');
-    messageDiv.textContent = 'Qualcosa è andato storto. Riprova tra poco!';
+    messageDiv.className = 'message-box error';
+    messageDiv.innerHTML = '<i class="fas fa-times-circle"></i> Qualcosa è andato storto. Riprova tra poco!';
   }
 }
 
@@ -94,6 +140,18 @@ document.getElementById('togglePassword').addEventListener('click', function() {
     this.classList.remove('fa-eye-slash');
     this.classList.add('fa-eye');
   }
+});
+
+// Animazione focus sugli input
+document.querySelectorAll('.input-wrapper input').forEach(input => {
+  input.addEventListener('focus', function() {
+    this.parentElement.style.transform = 'scale(1.02)';
+    this.parentElement.style.transition = 'transform 0.2s';
+  });
+  
+  input.addEventListener('blur', function() {
+    this.parentElement.style.transform = 'scale(1)';
+  });
 });
 </script>
 
