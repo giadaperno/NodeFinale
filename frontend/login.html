@@ -66,12 +66,12 @@ async function handleLogin() {
             window.location.href = '/user.html';
         }
     } else {
-      messageDiv.textContent = data.message || '⚠️ Ops! Credenziali non corrette';
+      messageDiv.textContent = data.message || 'Ops! Credenziali non corrette';
     }
   } catch (err) {
     console.error(err);
     const messageDiv = document.getElementById('message');
-    messageDiv.textContent = '⚠️ Qualcosa è andato storto. Riprova tra poco!';
+    messageDiv.textContent = 'Qualcosa è andato storto. Riprova tra poco!';
   }
 }
 

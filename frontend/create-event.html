@@ -98,17 +98,17 @@ document.getElementById('createBtn').addEventListener('click', async () => {
 
     if (res.ok) {
       messageDiv.style.color = 'green';
-      messageDiv.textContent = '✅ Evento creato con successo!';
+      messageDiv.textContent = 'Evento creato con successo!';
       setTimeout(() => window.location.href = '/user.html', 1500);
     } else {
       messageDiv.style.color = 'red';
-      messageDiv.textContent = data.message || '⚠️ Ops! Non siamo riusciti a creare l\'evento';
+      messageDiv.textContent = data.message || 'Ops! Non siamo riusciti a creare l\'evento';
     }
   } catch(err) {
     console.error(err);
     const messageDiv = document.getElementById('message');
     messageDiv.style.color = 'red';
-    messageDiv.textContent = '⚠️ Qualcosa è andato storto. Riprova tra poco!';
+    messageDiv.textContent = 'Qualcosa è andato storto. Riprova tra poco!';
   }
 });
 

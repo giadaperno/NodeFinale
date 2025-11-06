@@ -57,12 +57,12 @@ async function handleRegister() {
       // Reindirizza subito al login
       window.location.href = '/login.html';
     } else {
-      messageDiv.textContent = data.message || '⚠️ Ops! Qualcosa è andato storto durante la registrazione';
+      messageDiv.textContent = data.message || 'Ops! Qualcosa è andato storto durante la registrazione';
     }
   } catch (err) {
     console.error(err);
     const messageDiv = document.getElementById('message');
-    messageDiv.textContent = '⚠️ Qualcosa è andato storto. Riprova tra poco!';
+    messageDiv.textContent = 'Qualcosa è andato storto. Riprova tra poco!';
   }
 }
 

@@ -170,14 +170,14 @@ async function loadPendingEvents() {
       <div class="event-info">
         <h4 class="event-title">${ev.title}</h4>
         <div class="event-meta">
-          <span>📁 ${ev.category || 'Generale'}</span> • 
-          <span>📍 ${ev.location}</span>
+          <span>${ev.category || 'Generale'}</span> • 
+          <span>${ev.location}</span>
         </div>
         <div class="event-meta">
-          <span>📅 ${eventDate.toLocaleDateString('it-IT', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
+          <span>${eventDate.toLocaleDateString('it-IT', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
         </div>
         <div class="event-meta">
-          <span>👥 Capacità: ${ev.capacity} persone</span>
+          <span>Capacità: ${ev.capacity} persone</span>
         </div>
         <div class="event-actions">
           <button onclick="approveEvent(${ev.id})" class="primary">✓ Approva</button>
