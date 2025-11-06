@@ -4,29 +4,68 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>EventHub - Modifica Evento</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 <link rel="stylesheet" href="/css/edit-event.css">
 </head>
 <body>
 
 <header>
-  <h1>EventHub - Modifica Evento</h1>
-  <button id="backBtn" class="secondary">Indietro</button>
+  <h1>EventHub</h1>
+  <button id="backBtn" class="secondary"><i class="fas fa-arrow-left"></i> Indietro</button>
 </header>
 
 <div class="edit-container">
-  <h2>Modifica Evento</h2>
+  <div class="form-header">
+    <i class="fas fa-edit"></i>
+    <h2>Modifica Evento</h2>
+  </div>
   
-  <input type="text" id="title" placeholder="Titolo evento">
-  <textarea id="description" placeholder="Descrizione evento"></textarea>
-  <input type="text" id="category" placeholder="Categoria">
-  <input type="text" id="location" placeholder="Luogo">
-  <input type="date" id="date">
-  <input type="number" id="capacity" placeholder="Capacità">
-  <input type="url" id="image" placeholder="URL immagine (opzionale)" maxlength="500" style="width: 100%;">
-  
-  <button id="updateBtn" class="primary">Salva Modifiche</button>
+  <form id="editForm">
+    <div class="form-group">
+      <label for="title"><i class="fas fa-heading"></i> Titolo</label>
+      <input type="text" id="title" placeholder="Titolo evento" required>
+    </div>
 
-  <div id="message" style="color:red; margin-top:10px;"></div>
+    <div class="form-group">
+      <label for="description"><i class="fas fa-align-left"></i> Descrizione</label>
+      <textarea id="description" placeholder="Descrizione evento" rows="5" required></textarea>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="category"><i class="fas fa-tag"></i> Categoria</label>
+        <input type="text" id="category" placeholder="Es: Musica, Sport, Arte..." required>
+      </div>
+
+      <div class="form-group">
+        <label for="location"><i class="fas fa-map-marker-alt"></i> Luogo</label>
+        <input type="text" id="location" placeholder="Dove si svolge" required>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="date"><i class="fas fa-calendar"></i> Data</label>
+        <input type="date" id="date" required>
+      </div>
+
+      <div class="form-group">
+        <label for="capacity"><i class="fas fa-users"></i> Capacità</label>
+        <input type="number" id="capacity" placeholder="Numero massimo partecipanti" min="1" required>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="image"><i class="fas fa-image"></i> URL Immagine (opzionale)</label>
+      <input type="url" id="image" placeholder="https://esempio.com/immagine.jpg" maxlength="500">
+    </div>
+    
+    <button type="submit" id="updateBtn" class="primary">
+      <i class="fas fa-save"></i> Salva Modifiche
+    </button>
+
+    <div id="message"></div>
+  </form>
 </div>
 
 <script>
@@ -68,7 +107,9 @@ async function loadEvent() {
 loadEvent();
 
 // Aggiorna evento
-document.getElementById('updateBtn').addEventListener('click', async () => {
+document.getElementById('editForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
   const event = {
     title: document.getElementById('title').value,
     description: document.getElementById('description').value,
@@ -78,6 +119,13 @@ document.getElementById('updateBtn').addEventListener('click', async () => {
     capacity: document.getElementById('capacity').value,
     image: document.getElementById('image').value
   };
+
+  const messageDiv = document.getElementById('message');
+  const updateBtn = document.getElementById('updateBtn');
+  
+  // Disabilita il pulsante durante l'invio
+  updateBtn.disabled = true;
+  updateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvataggio...';
 
   try {
     const res = await fetch(`/api/events/${eventId}`, {
@@ -90,21 +138,23 @@ document.getElementById('updateBtn').addEventListener('click', async () => {
     });
 
     const data = await res.json();
-    const messageDiv = document.getElementById('message');
 
     if (res.ok) {
-      messageDiv.style.color = 'green';
-      messageDiv.textContent = 'Evento aggiornato con successo!';
+      messageDiv.className = 'success-message';
+      messageDiv.innerHTML = '<i class="fas fa-check-circle"></i> Evento aggiornato con successo!';
       setTimeout(() => window.location.href = '/user.html', 1500);
     } else {
-      messageDiv.style.color = 'red';
-      messageDiv.textContent = data.message || 'Ops! Non siamo riusciti ad aggiornare l\'evento';
+      messageDiv.className = 'error-message';
+      messageDiv.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${data.message || 'Ops! Non siamo riusciti ad aggiornare l\'evento'}`;
+      updateBtn.disabled = false;
+      updateBtn.innerHTML = '<i class="fas fa-save"></i> Salva Modifiche';
     }
   } catch(err) {
     console.error(err);
-    const messageDiv = document.getElementById('message');
-    messageDiv.style.color = 'red';
-    messageDiv.textContent = 'Qualcosa è andato storto. Riprova tra poco!';
+    messageDiv.className = 'error-message';
+    messageDiv.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Qualcosa è andato storto. Riprova tra poco!';
+    updateBtn.disabled = false;
+    updateBtn.innerHTML = '<i class="fas fa-save"></i> Salva Modifiche';
   }
 });
 
