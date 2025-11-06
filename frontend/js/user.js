@@ -35,12 +35,12 @@ socket.on('new-message', (message) => {
 });
 
 socket.on('user-registered', (payload) => {
-  showNotification(`Nuova iscrizione evento ${payload.eventId}: ${payload.user?.name || 'Utente'}`);
+  showNotification(`Nuova iscrizione evento ${payload.eventId}: ${payload.user?.name || 'Utente'}`, 4000, 'success');
   updateParticipantCount(payload.eventId, payload.participantCount);
 });
 
 socket.on('user-unregistered', (payload) => {
-  showNotification(`Iscrizione annullata evento ${payload.eventId}: ${payload.user?.name || 'Utente'}`);
+  showNotification(`Iscrizione annullata evento ${payload.eventId}: ${payload.user?.name || 'Utente'}`, 4000, 'info');
   updateParticipantCount(payload.eventId, payload.participantCount);
 });
 
@@ -49,7 +49,7 @@ socket.on('participant-count-updated', (payload) => {
 });
 
 socket.on('event-reported', (payload) => {
-  showNotification(`Segnalazione evento: ${payload.event?.title || payload.event?.id} da ${payload.reporter?.name || 'Utente'}`);
+  showNotification(`Segnalazione evento: ${payload.event?.title || payload.event?.id} da ${payload.reporter?.name || 'Utente'}`, 4000, 'info');
 });
 
 // Logout
@@ -80,6 +80,17 @@ async function loadPublicEvents() {
       const registeredCount = event.participantCount || 0;
       const capacityPercentage = (registeredCount / event.capacity) * 100;
       const isRegistered = registeredEventIds.has(event.id);
+      const isFull = registeredCount >= event.capacity;
+      
+      // Determina il badge di stato
+      let statusBadge = '';
+      if (!isUpcoming) {
+        statusBadge = '<span class="status-badge past"><i class="fas fa-history"></i> Passato</span>';
+      } else if (isFull) {
+        statusBadge = '<span class="status-badge full"><i class="fas fa-lock"></i> Al completo</span>';
+      } else {
+        statusBadge = '<span class="status-badge upcoming"><i class="fas fa-calendar-check"></i> Prossimo</span>';
+      }
 
       const box = document.createElement("div");
       box.className = "event-box";
@@ -87,7 +98,10 @@ async function loadPublicEvents() {
       box.innerHTML = `
         <img src="${event.image || '/assets/images/defaults/event-default.jpg'}" alt="${event.title}" class="event-image">
         <div class="event-content">
-          <span class="category-badge">${event.category || 'Generale'}</span>
+          <div>
+            <span class="category-badge">${event.category || 'Generale'}</span>
+            ${statusBadge}
+          </div>
           <h3 class="event-title">${event.title}</h3>
           
           <div class="event-meta">
@@ -157,13 +171,13 @@ async function reportEvent(eventId, eventTitle) {
 
     const data = await res.json();
     if (res.ok) {
-      alert(`✅ Evento "${eventTitle}" segnalato con successo.`);
+      showNotification(`Evento "${eventTitle}" segnalato con successo`, 4000, 'success');
     } else {
-      alert(`⚠️ Errore durante la segnalazione: ${data.message}`);
+      showNotification(`Errore durante la segnalazione: ${data.message}`, 4000, 'error');
     }
   } catch (err) {
     console.error("Errore durante la segnalazione dell'evento:", err);
-    alert("Errore durante la segnalazione dell'evento.");
+    showNotification("Errore durante la segnalazione dell'evento", 4000, 'error');
   }
 }
 
@@ -178,12 +192,29 @@ async function loadMyCreatedEvents() {
           const eventDate = new Date(e.date);
           const registeredCount = e.participantCount || 0;
           const capacityPercentage = (registeredCount / e.capacity) * 100;
+          const isUpcoming = eventDate > new Date();
+          const isFull = registeredCount >= e.capacity;
+          
+          // Determina il badge di stato
+          let statusBadge = '';
+          if (!isUpcoming) {
+            statusBadge = '<span class="status-badge past"><i class="fas fa-history"></i> Passato</span>';
+          } else if (isFull) {
+            statusBadge = '<span class="status-badge full"><i class="fas fa-lock"></i> Al completo</span>';
+          } else if (registeredCount > 0) {
+            statusBadge = '<span class="status-badge available"><i class="fas fa-check"></i> Disponibile</span>';
+          } else {
+            statusBadge = '<span class="status-badge upcoming"><i class="fas fa-calendar-check"></i> Prossimo</span>';
+          }
           
           return `
             <div class="event-box" data-event-id="${e.id}">
               <img src="${e.image || '/assets/images/defaults/event-default.jpg'}" alt="${e.title}" class="event-image">
               <div class="event-content">
-                <span class="category-badge">${e.category || 'Generale'}</span>
+                <div>
+                  <span class="category-badge">${e.category || 'Generale'}</span>
+                  ${statusBadge}
+                </div>
                 <h3 class="event-title">${e.title}</h3>
                 
                 <div class="event-meta">
@@ -234,12 +265,26 @@ async function loadMyRegisteredEvents() {
           const isUpcoming = eventDate > new Date();
           const registeredCount = e.participantCount || 0;
           const capacityPercentage = (registeredCount / e.capacity) * 100;
+          const isFull = registeredCount >= e.capacity;
+          
+          // Determina il badge di stato
+          let statusBadge = '';
+          if (!isUpcoming) {
+            statusBadge = '<span class="status-badge past"><i class="fas fa-history"></i> Passato</span>';
+          } else if (isFull) {
+            statusBadge = '<span class="status-badge full"><i class="fas fa-users"></i> Al completo</span>';
+          } else {
+            statusBadge = '<span class="status-badge upcoming"><i class="fas fa-calendar-check"></i> Prossimo</span>';
+          }
           
           return `
             <div class="event-box" data-event-id="${e.id}">
               <img src="${e.image || '/assets/images/defaults/event-default.jpg'}" alt="${e.title}" class="event-image">
               <div class="event-content">
-                <span class="category-badge">${e.category || 'Generale'}</span>
+                <div>
+                  <span class="category-badge">${e.category || 'Generale'}</span>
+                  ${statusBadge}
+                </div>
                 <h3 class="event-title">${e.title}</h3>
                 
                 <div class="event-meta">
@@ -310,15 +355,16 @@ async function registerEvent(eventId, eventTitle) {
 
     const data = await res.json();
     if (res.ok) {
-      alert(`Ti sei iscritto a "${eventTitle}"`);
+      showNotification(`Ti sei iscritto a "${eventTitle}"`, 4000, 'success');
       // Ricarica tutte le sezioni per aggiornare i pulsanti
       loadPublicEvents();
       loadMyRegisteredEvents();
     } else {
-      alert(`Errore iscrizione: ${data.message}`);
+      showNotification(`Errore iscrizione: ${data.message}`, 4000, 'error');
     }
   } catch (err) {
     console.error("Errore iscrizione evento:", err);
+    showNotification("Errore durante l'iscrizione", 4000, 'error');
   }
 }
 
@@ -338,12 +384,12 @@ async function cancelRegistration(eventId) {
     const data = await res.json();
     if (!res.ok) throw new Error(data.message);
 
-    alert(`Iscrizione annullata`);
+    showNotification("Iscrizione annullata con successo", 4000, 'success');
     // Ricarica tutte le sezioni per aggiornare i pulsanti
     loadPublicEvents();
     loadMyRegisteredEvents();
   } catch (err) {
-    alert(`Errore: ${err.message}`);
+    showNotification(`Errore: ${err.message}`, 4000, 'error');
   }
 }
 
@@ -410,33 +456,36 @@ async function loadChatMessages(eventId) {
   }
 }
 
-// Toast notification semplice
-function showNotification(text, timeout = 4000) {
+// Toast notification con progress bar automatica
+function showNotification(text, timeout = 4000, type = 'info') {
   let container = document.getElementById('notificationContainer');
   if (!container) {
     container = document.createElement('div');
     container.id = 'notificationContainer';
-    container.style.position = 'fixed';
-    container.style.top = '10px';
-    container.style.right = '10px';
-    container.style.zIndex = 2000;
     document.body.appendChild(container);
   }
 
   const el = document.createElement('div');
-  el.className = 'toast-notification';
-  el.style.background = '#333';
-  el.style.color = 'white';
-  el.style.padding = '8px 12px';
-  el.style.marginTop = '8px';
-  el.style.borderRadius = '6px';
-  el.style.boxShadow = '0 2px 6px rgba(0,0,0,0.2)';
-  el.textContent = text;
+  el.className = `toast-notification ${type}`;
+  
+  // Icone diverse per tipo
+  let icon = 'fa-info-circle';
+  if (type === 'success') icon = 'fa-check-circle';
+  if (type === 'error') icon = 'fa-exclamation-circle';
+  
+  el.innerHTML = `
+    <button class="toast-close" onclick="this.parentElement.remove()">×</button>
+    <div class="toast-content">
+      <i class="fas ${icon}"></i>
+      <span>${text}</span>
+    </div>
+  `;
+  
   container.appendChild(el);
 
+  // Rimuovi automaticamente dopo il timeout
   setTimeout(() => {
-    el.style.transition = 'opacity 0.3s';
-    el.style.opacity = '0';
+    el.classList.add('hide');
     setTimeout(() => el.remove(), 300);
   }, timeout);
 }
@@ -504,7 +553,7 @@ async function sendChatMessage() {
     input.value = '';
   } catch (err) {
     console.error('Errore nell\'invio del messaggio:', err);
-    alert('Errore nell\'invio del messaggio');
+    showNotification('Errore nell\'invio del messaggio', 4000, 'error');
   }
 }
 
