@@ -375,6 +375,96 @@ Headers: Authorization: Bearer <token>
 
 ---
 
+### Eventi Più Popolari
+```http
+GET /api/events/popular?limit=10
+```
+**Query Parameters:**
+- `limit` (opzionale, default: 10): Numero massimo di eventi da restituire
+
+**Response:** `200 OK`
+```json
+[
+  {
+    "id": 1,
+    "title": "Concerto Rock",
+    "description": "Un grande concerto",
+    "category": "Musica",
+    "location": "Milano",
+    "date": "2025-01-15T20:00:00.000Z",
+    "capacity": 100,
+    "image": "/assets/images/events/concerto.jpg",
+    "isApproved": true,
+    "participantCount": "150"
+  }
+]
+```
+
+---
+
+### Eventi Futuri
+```http
+GET /api/events/upcoming?limit=20
+```
+**Query Parameters:**
+- `limit` (opzionale, default: 20): Numero massimo di eventi da restituire
+
+**Response:** `200 OK`
+```json
+[
+  {
+    "id": 3,
+    "title": "Workshop Fotografia",
+    "description": "Corso base di fotografia",
+    "category": "Formazione",
+    "location": "Torino",
+    "date": "2025-01-20T10:00:00.000Z",
+    "capacity": 30,
+    "image": "/assets/images/events/workshop.jpg",
+    "isApproved": true,
+    "participantCount": "12"
+  }
+]
+```
+**Note:** Restituisce solo eventi con data >= oggi, ordinati dal più vicino al più lontano
+
+---
+
+### Lista Partecipanti Evento
+```http
+GET /api/events/:id/participants
+```
+**Response:** `200 OK`
+```json
+{
+  "eventId": 1,
+  "eventTitle": "Concerto Rock",
+  "totalParticipants": 3,
+  "participants": [
+    {
+      "id": 1,
+      "name": "Mario Rossi",
+      "email": "mario@example.com",
+      "createdAt": "2025-01-01T00:00:00.000Z",
+      "EventRegistration": {
+        "createdAt": "2025-01-10T12:00:00.000Z"
+      }
+    },
+    {
+      "id": 2,
+      "name": "Luigi Bianchi",
+      "email": "luigi@example.com",
+      "createdAt": "2025-01-02T00:00:00.000Z",
+      "EventRegistration": {
+        "createdAt": "2025-01-11T14:30:00.000Z"
+      }
+    }
+  ]
+}
+```
+
+---
+
 ### Segnala Evento
 ```http
 POST /api/events/:id/report
@@ -639,6 +729,119 @@ Headers: Authorization: Bearer <token>
 
 ---
 
+## 8️⃣ Admin - Statistiche (`/api/admin`)
+
+### Statistiche Piattaforma
+```http
+GET /api/admin/stats
+Headers: Authorization: Bearer <token>
+```
+**Response:** `200 OK`
+```json
+{
+  "users": {
+    "total": 150,
+    "active": 145,
+    "blocked": 5
+  },
+  "events": {
+    "total": 75,
+    "approved": 60,
+    "pending": 15
+  },
+  "registrations": {
+    "total": 450
+  },
+  "messages": {
+    "total": 1250
+  },
+  "notifications": {
+    "total": 30,
+    "unread": 8
+  },
+  "topEventsByCategory": [
+    {
+      "category": "Musica",
+      "count": 25
+    },
+    {
+      "category": "Sport",
+      "count": 20
+    }
+  ],
+  "topEventsByParticipants": [
+    {
+      "id": 1,
+      "title": "Concerto Rock",
+      "participantCount": "150",
+      ...
+    }
+  ],
+  "topActiveUsers": [
+    {
+      "id": 5,
+      "name": "Giulia Verdi",
+      "email": "giulia@example.com",
+      "eventCount": "12"
+    }
+  ]
+}
+```
+
+---
+
+## 9️⃣ Notifiche (`/api/notifications`) - Solo Admin
+  {
+    "id": 1,
+    "name": "Mario Rossi",
+    "email": "mario@example.com",
+    "role": "user",
+    "isActive": true,
+    "createdAt": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "id": 2,
+    "name": "Admin",
+    "email": "admin@example.com",
+    "role": "admin",
+    "isActive": true,
+    "createdAt": "2025-01-01T00:00:00.000Z"
+  }
+]
+```
+
+---
+
+### Blocca Utente
+```http
+PUT /api/admin/users/:id/block
+Headers: Authorization: Bearer <token>
+```
+**Response:** `200 OK`
+```json
+{
+  "message": "Utente Mario Rossi bloccato con successo",
+  "user": { ... }
+}
+```
+
+---
+
+### Sblocca Utente
+```http
+PUT /api/admin/users/:id/unblock
+Headers: Authorization: Bearer <token>
+```
+**Response:** `200 OK`
+```json
+{
+  "message": "Utente Mario Rossi sbloccato con successo",
+  "user": { ... }
+}
+```
+
+---
+
 ## 8️⃣ Notifiche (`/api/notifications`) - Solo Admin
 
 ### Tutte le Notifiche
@@ -821,7 +1024,10 @@ curl -X GET "http://localhost:5000/api/events?category=Musica"
 | DELETE | `/api/users/me` | ✅ | user |
 | GET | `/api/users/:id` | ❌ | - |
 | GET | `/api/events` | ❌ | - |
+| GET | `/api/events/popular` | ❌ | - |
+| GET | `/api/events/upcoming` | ❌ | - |
 | GET | `/api/events/:id` | ❌ | - |
+| GET | `/api/events/:id/participants` | ❌ | - |
 | POST | `/api/events` | ✅ | user |
 | PUT | `/api/events/:id` | ✅ | owner/admin |
 | DELETE | `/api/events/:id` | ✅ | owner/admin |
@@ -839,10 +1045,11 @@ curl -X GET "http://localhost:5000/api/events?category=Musica"
 | GET | `/api/admin/users` | ✅ | admin |
 | PUT | `/api/admin/users/:id/block` | ✅ | admin |
 | PUT | `/api/admin/users/:id/unblock` | ✅ | admin |
+| GET | `/api/admin/stats` | ✅ | admin |
 | GET | `/api/notifications` | ✅ | admin |
 | PUT | `/api/notifications/:id/read` | ✅ | admin |
 | PUT | `/api/notifications/read-all` | ✅ | admin |
 | DELETE | `/api/notifications/:id` | ✅ | admin |
 | DELETE | `/api/notifications/read/all` | ✅ | admin |
 
-**Totale: 40 endpoints RESTful** ✅
+**Totale: 45 endpoints RESTful** ✅

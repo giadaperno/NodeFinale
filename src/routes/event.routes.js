@@ -7,7 +7,10 @@ import {
   updateEvent,
   deleteEvent,
   getUserCreatedEvents,
-  reportEvent
+  reportEvent,
+  getEventParticipants,
+  getPopularEvents,
+  getUpcomingEvents
 } from "../controllers/event.controller.js";
 
 const router = express.Router();
@@ -17,6 +20,12 @@ router.post("/", verifyToken, createEvent);
 
 // Lista tutti gli eventi approvati (pubblico)
 router.get("/", listEvents);
+
+// Eventi più popolari (pubblico)
+router.get("/popular", getPopularEvents);
+
+// Eventi futuri (pubblico)
+router.get("/upcoming", getUpcomingEvents);
 
 // Eventi creati dall'utente autenticato
 router.get("/my-created", verifyToken, getUserCreatedEvents);
@@ -29,6 +38,9 @@ router.delete("/:id", verifyToken, deleteEvent);
 
 // Dettaglio di un singolo evento (alla fine!)
 router.get("/:id", getEventById);
+
+// Lista partecipanti di un evento (pubblico o protetto, a tua scelta)
+router.get("/:id/participants", getEventParticipants);
 
 // Segnala un evento (notifica agli admin)
 router.post("/:id/report", verifyToken, reportEvent);

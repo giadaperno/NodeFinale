@@ -73,17 +73,20 @@ export const listEvents = async (req, res) => {
       include: [{
         model: User,
         as: "participants",
-        attributes: [],
-        through: { attributes: [] },
-        required: false
-      }],
-      attributes: {
-        include: [[sequelize.fn("COUNT", sequelize.col("participants.id")), "participantCount"]]
-      },
-      group: ["Event.id"]
+        attributes: ['id'],
+        through: { attributes: [] }
+      }]
     });
 
-    res.json(events);
+    // Aggiungi il conteggio partecipanti
+    const eventsWithCount = events.map(event => {
+      const eventData = event.toJSON();
+      eventData.participantCount = eventData.participants ? eventData.participants.length : 0;
+      delete eventData.participants;
+      return eventData;
+    });
+
+    res.json(eventsWithCount);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Errore server", error: error.message });
@@ -99,18 +102,19 @@ export const getEventById = async (req, res) => {
       include: [{
         model: User,
         as: "participants",
-        attributes: [],
-        through: { attributes: [] },
-        required: false
-      }],
-      attributes: {
-        include: [[sequelize.fn("COUNT", sequelize.col("participants.id")), "participantCount"]]
-      },
-      group: ["Event.id"]
+        attributes: ['id'],
+        through: { attributes: [] }
+      }]
     });
 
     if (!event) return res.status(404).json({ message: "Evento non trovato" });
-    res.json(event);
+    
+    // Aggiungi il conteggio partecipanti
+    const eventData = event.toJSON();
+    eventData.participantCount = eventData.participants ? eventData.participants.length : 0;
+    delete eventData.participants;
+    
+    res.json(eventData);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Errore server", error: error.message });
@@ -172,17 +176,21 @@ export const getUserCreatedEvents = async (req, res) => {
       include: [{
         model: User,
         as: "participants",
-        attributes: [],
-        through: { attributes: [] },
-        required: false
+        attributes: ['id'],
+        through: { attributes: [] }
       }],
-      attributes: {
-        include: [[sequelize.fn("COUNT", sequelize.col("participants.id")), "participantCount"]]
-      },
-      group: ["Event.id"],
       order: [["date", "DESC"]],
     });
-    res.json(events);
+    
+    // Aggiungi il conteggio partecipanti
+    const eventsWithCount = events.map(event => {
+      const eventData = event.toJSON();
+      eventData.participantCount = eventData.participants ? eventData.participants.length : 0;
+      delete eventData.participants;
+      return eventData;
+    });
+    
+    res.json(eventsWithCount);
   } catch (error) {
     console.error("Errore getUserCreatedEvents:", error);
     res.status(500).json({ message: "Errore nel recupero eventi creati" });
@@ -221,6 +229,109 @@ export const reportEvent = async (req, res) => {
     res.status(200).json({ message: `Evento ${id} segnalato con successo.` });
   } catch (error) {
     console.error("Errore durante la segnalazione dell'evento:", error);
+    res.status(500).json({ message: "Errore server", error: error.message });
+  }
+};
+
+// Lista partecipanti di un evento
+export const getEventParticipants = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const event = await Event.findByPk(id, {
+      include: [{
+        model: User,
+        as: "participants",
+        attributes: ['id', 'name', 'email', 'createdAt'],
+        through: { attributes: ['createdAt'] } // Include la data di iscrizione
+      }]
+    });
+
+    if (!event) {
+      return res.status(404).json({ message: "Evento non trovato" });
+    }
+
+    res.json({
+      eventId: event.id,
+      eventTitle: event.title,
+      totalParticipants: event.participants.length,
+      participants: event.participants
+    });
+  } catch (error) {
+    console.error("Errore getEventParticipants:", error);
+    res.status(500).json({ message: "Errore server", error: error.message });
+  }
+};
+
+// Eventi più popolari (ordinati per numero di partecipanti)
+export const getPopularEvents = async (req, res) => {
+  try {
+    const { limit = 10 } = req.query;
+
+    const events = await Event.findAll({
+      where: { isApproved: true },
+      include: [{
+        model: User,
+        as: "participants",
+        attributes: ['id'],
+        through: { attributes: [] }
+      }],
+      order: [["createdAt", "DESC"]]
+    });
+
+    // Ordina per numero di partecipanti in JavaScript
+    const eventsWithCount = events.map(event => {
+      const eventData = event.toJSON();
+      eventData.participantCount = eventData.participants ? eventData.participants.length : 0;
+      delete eventData.participants; // Rimuovi l'array completo
+      return eventData;
+    });
+
+    // Ordina per participantCount decrescente
+    eventsWithCount.sort((a, b) => b.participantCount - a.participantCount);
+
+    // Limita i risultati
+    const limitedEvents = eventsWithCount.slice(0, parseInt(limit));
+
+    res.json(limitedEvents);
+  } catch (error) {
+    console.error("Errore getPopularEvents:", error);
+    res.status(500).json({ message: "Errore server", error: error.message });
+  }
+};
+
+// Eventi futuri (ordinati per data)
+export const getUpcomingEvents = async (req, res) => {
+  try {
+    const { limit = 20 } = req.query;
+    const now = new Date();
+
+    const events = await Event.findAll({
+      where: { 
+        isApproved: true,
+        date: { [Op.gte]: now } // Eventi con data >= oggi
+      },
+      include: [{
+        model: User,
+        as: "participants",
+        attributes: ['id'],
+        through: { attributes: [] }
+      }],
+      order: [["date", "ASC"]], // Dal più vicino al più lontano
+      limit: parseInt(limit)
+    });
+
+    // Aggiungi il conteggio partecipanti
+    const eventsWithCount = events.map(event => {
+      const eventData = event.toJSON();
+      eventData.participantCount = eventData.participants ? eventData.participants.length : 0;
+      delete eventData.participants; // Rimuovi l'array completo
+      return eventData;
+    });
+
+    res.json(eventsWithCount);
+  } catch (error) {
+    console.error("Errore getUpcomingEvents:", error);
     res.status(500).json({ message: "Errore server", error: error.message });
   }
 };
