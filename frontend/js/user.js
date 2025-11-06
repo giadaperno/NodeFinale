@@ -139,8 +139,6 @@ async function loadPublicEvents(filters = {}) {
             <span><i class="fas fa-map-marker-alt"></i> Dove: ${event.location}</span>
           </div>
 
-          <p class="event-description">${event.description || 'Nessuna descrizione disponibile'}</p>
-
           <div class="capacity-indicator">
             <span><i class="fas fa-users"></i> ${registeredCount}/${event.capacity} partecipanti</span>
             <div class="capacity-bar">
@@ -149,6 +147,9 @@ async function loadPublicEvents(filters = {}) {
           </div>
 
           <div class="event-actions">
+            <button onclick="showEventDetails(${event.id})" class="info-button">
+              <i class="fas fa-info-circle"></i> Dettagli
+            </button>
             ${isUpcoming ? `
               ${!isRegistered ? `
                 <button onclick="registerEvent(${event.id}, '${event.title.replace(/'/g, "\\'")}')" class="primary">
@@ -260,6 +261,9 @@ async function loadMyCreatedEvents() {
                 </div>
 
                 <div class="event-actions">
+                  <button onclick="showEventDetails(${e.id})" class="info-button">
+                    <i class="fas fa-info-circle"></i> Dettagli
+                  </button>
                   <button onclick="editEvent(${e.id})" class="primary">
                     <i class="fas fa-edit"></i> Modifica
                   </button>
@@ -322,8 +326,6 @@ async function loadMyRegisteredEvents() {
                   <span><i class="fas fa-map-marker-alt"></i> Dove: ${e.location}</span>
                 </div>
 
-                <p class="event-description">${e.description || 'Nessuna descrizione disponibile'}</p>
-
                 <div class="capacity-indicator">
                   <span><i class="fas fa-users"></i> ${registeredCount}/${e.capacity} partecipanti</span>
                   <div class="capacity-bar">
@@ -332,6 +334,9 @@ async function loadMyRegisteredEvents() {
                 </div>
 
                 <div class="event-actions">
+                  <button onclick="showEventDetails(${e.id})" class="info-button">
+                    <i class="fas fa-info-circle"></i> Dettagli
+                  </button>
                   ${isUpcoming ? `
                     <button onclick="openEventChat(${e.id}, '${e.title.replace(/'/g, "\\'")}')" class="primary">
                       <i class="fas fa-comments"></i> Chat
@@ -627,6 +632,125 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 });
+
+// Mostra dettagli evento in un modal
+async function showEventDetails(eventId) {
+  try {
+    const res = await fetch(`/api/events/${eventId}`);
+    if (!res.ok) {
+      showNotification('Impossibile caricare i dettagli dell\'evento', 4000, 'error');
+      return;
+    }
+    
+    const event = await res.json();
+    const eventDate = new Date(event.date);
+    const isUpcoming = eventDate > new Date();
+    const registeredCount = event.participantCount || 0;
+    const capacityPercentage = (registeredCount / event.capacity) * 100;
+    const isFull = registeredCount >= event.capacity;
+    
+    // Determina il badge di stato
+    let statusBadge = '';
+    if (!isUpcoming) {
+      statusBadge = '<span class="status-badge past"><i class="fas fa-history"></i> Passato</span>';
+    } else if (isFull) {
+      statusBadge = '<span class="status-badge full"><i class="fas fa-lock"></i> Al completo</span>';
+    } else {
+      statusBadge = '<span class="status-badge upcoming"><i class="fas fa-calendar-check"></i> Prossimo</span>';
+    }
+    
+    // Crea il modal
+    const modal = document.createElement('div');
+    modal.className = 'event-details-modal';
+    modal.innerHTML = `
+      <div class="event-details-content">
+        <button class="close-modal" onclick="this.parentElement.parentElement.remove()">
+          <i class="fas fa-times"></i>
+        </button>
+        
+        <div class="modal-header">
+          ${event.image ? `<img src="${event.image}" alt="${event.title}" class="modal-event-image">` : ''}
+          <div class="modal-title-section">
+            <h2>${event.title}</h2>
+            <div class="modal-badges">
+              <span class="category-badge">${event.category || 'Generale'}</span>
+              ${statusBadge}
+            </div>
+          </div>
+        </div>
+        
+        <div class="modal-body">
+          <div class="detail-section">
+            <h3><i class="fas fa-align-left"></i> Descrizione</h3>
+            <p>${event.description || 'Nessuna descrizione disponibile'}</p>
+          </div>
+          
+          <div class="detail-section">
+            <h3><i class="fas fa-info-circle"></i> Informazioni</h3>
+            <div class="info-grid">
+              <div class="info-item">
+                <i class="fas fa-user"></i>
+                <div>
+                  <span class="info-label">Creato da</span>
+                  <span class="info-value creator-name">${event.creatorName || 'Sconosciuto'}</span>
+                </div>
+              </div>
+              <div class="info-item">
+                <i class="fas fa-calendar"></i>
+                <div>
+                  <span class="info-label">Data</span>
+                  <span class="info-value">${eventDate.toLocaleDateString('it-IT', { 
+                    weekday: 'long',
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric'
+                  })}</span>
+                </div>
+              </div>
+              <div class="info-item">
+                <i class="fas fa-map-marker-alt"></i>
+                <div>
+                  <span class="info-label">Luogo</span>
+                  <span class="info-value">${event.location}</span>
+                </div>
+              </div>
+              <div class="info-item">
+                <i class="fas fa-users"></i>
+                <div>
+                  <span class="info-label">Partecipanti</span>
+                  <span class="info-value">${registeredCount}/${event.capacity}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="detail-section">
+            <h3><i class="fas fa-chart-bar"></i> Disponibilità</h3>
+            <div class="capacity-indicator">
+              <div class="capacity-bar">
+                <div class="capacity-fill" style="width: ${capacityPercentage}%"></div>
+              </div>
+              <span>${Math.round(capacityPercentage)}% occupato</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Chiudi modal cliccando fuori
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        modal.remove();
+      }
+    });
+    
+  } catch (err) {
+    console.error('Errore nel caricamento dei dettagli evento:', err);
+    showNotification('Errore nel caricamento dei dettagli', 4000, 'error');
+  }
+}
 
 // Inizializza dashboard
 loadPublicEvents();
