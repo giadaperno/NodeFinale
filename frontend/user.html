@@ -4,32 +4,52 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>EventHub - Area Personale</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
 
 <header>
-  <h1>EventHub - Area User</h1>
+  <h1><i class="fas fa-calendar-alt"></i> EventHub</h1>
   <div>
-    <button id="logoutBtn">Logout</button>
+    <button id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button>
   </div>
 </header>
 
 <div class="dashboard">
   <div class="box">
-    <h3>I miei eventi creati</h3>
+    <h3><i class="fas fa-plus-circle"></i> I miei eventi creati</h3>
     <div id="myCreatedEvents"></div>
-    <button onclick="window.location.href='/create-event.html'">Crea nuovo evento</button>
+    <button onclick="window.location.href='/create-event.html'">
+      <i class="fas fa-plus"></i> Crea nuovo evento
+    </button>
   </div>
   
   <div class="box">
-    <h3>Eventi a cui sono iscritto</h3>
+    <h3><i class="fas fa-ticket-alt"></i> Eventi a cui sono iscritto</h3>
     <div id="myRegisteredEvents"></div>
   </div>
 </div>
 
-<h2>Eventi pubblici</h2>
-<div class="events" id="eventsContainer"></div>
+<div class="public-events-section">
+  <h2><i class="fas fa-globe"></i> Eventi pubblici</h2>
+  
+  <!-- Barra dei filtri -->
+  <div class="filters">
+    <input type="text" id="searchFilter" placeholder="Cerca per titolo..." />
+    <input type="text" id="categoryFilter" placeholder="Categoria (es: Musica)" />
+    <input type="text" id="locationFilter" placeholder="Luogo (es: Milano)" />
+    <input type="date" id="dateFilter" placeholder="Data" />
+    <button id="applyFilters" class="primary">
+      <i class="fas fa-search"></i> Cerca
+    </button>
+    <button id="clearFilters" class="secondary">
+      <i class="fas fa-times"></i> Pulisci
+    </button>
+  </div>
+  
+  <div class="events" id="eventsContainer"></div>
+</div>
 
 <script src="/socket.io/socket.io.js"></script>
 <script src="/js/user.js"></script>

@@ -204,6 +204,13 @@ h2 {
   margin-top: 0;
   margin-bottom: 15px;
   font-size: 1.8rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+h2 i {
+  color: var(--primary);
 }
 
 h3 {
@@ -211,6 +218,19 @@ h3 {
   margin-top: 0;
   margin-bottom: 10px;
   font-size: 1.4rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+h3 i {
+  color: var(--primary);
+}
+
+.public-events-section {
+  margin-top: 40px;
+  padding-top: 30px;
+  border-top: 3px solid var(--bg-light);
 }
 
 .dashboard {

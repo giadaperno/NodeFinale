@@ -61,10 +61,19 @@ document.getElementById("logoutBtn").addEventListener("click", () => {
   window.location.href = "/login.html";
 });
 
-// Carica eventi pubblici
-async function loadPublicEvents() {
+// Carica eventi pubblici con filtri opzionali
+async function loadPublicEvents(filters = {}) {
   try {
-    const res = await fetch("/api/events");
+    // Costruisci query string con i filtri
+    const queryParams = new URLSearchParams();
+    if (filters.category) queryParams.append('category', filters.category);
+    if (filters.location) queryParams.append('location', filters.location);
+    if (filters.date) queryParams.append('date', filters.date);
+    
+    const queryString = queryParams.toString();
+    const url = queryString ? `/api/events?${queryString}` : '/api/events';
+    
+    const res = await fetch(url);
     const events = await res.json();
     const container = document.getElementById("eventsContainer");
     container.innerHTML = "";
@@ -74,7 +83,22 @@ async function loadPublicEvents() {
     const registeredEvents = await registeredEventsRes.json();
     const registeredEventIds = new Set(registeredEvents.map(event => event.id));
 
-    events.forEach(event => {
+    // Applica filtro di ricerca per titolo (lato client)
+    let filteredEvents = events;
+    if (filters.search) {
+      const searchLower = filters.search.toLowerCase();
+      filteredEvents = events.filter(event => 
+        event.title.toLowerCase().includes(searchLower) ||
+        (event.description && event.description.toLowerCase().includes(searchLower))
+      );
+    }
+
+    if (filteredEvents.length === 0) {
+      container.innerHTML = '<p style="text-align: center; color: var(--text-light); padding: 40px;">Nessun evento trovato con i filtri selezionati.</p>';
+      return;
+    }
+
+    filteredEvents.forEach(event => {
       const eventDate = new Date(event.date);
       const isUpcoming = eventDate > new Date();
       const registeredCount = event.participantCount || 0;
@@ -562,6 +586,44 @@ document.addEventListener('DOMContentLoaded', () => {
   document.body.addEventListener('keypress', (e) => {
     if (e.target.id === 'messageInput' && e.key === 'Enter') {
       sendChatMessage();
+    }
+  });
+  
+  // Gestori filtri
+  const applyFiltersBtn = document.getElementById('applyFilters');
+  const clearFiltersBtn = document.getElementById('clearFilters');
+  
+  if (applyFiltersBtn) {
+    applyFiltersBtn.addEventListener('click', () => {
+      const filters = {
+        search: document.getElementById('searchFilter').value,
+        category: document.getElementById('categoryFilter').value,
+        location: document.getElementById('locationFilter').value,
+        date: document.getElementById('dateFilter').value
+      };
+      loadPublicEvents(filters);
+    });
+  }
+  
+  if (clearFiltersBtn) {
+    clearFiltersBtn.addEventListener('click', () => {
+      document.getElementById('searchFilter').value = '';
+      document.getElementById('categoryFilter').value = '';
+      document.getElementById('locationFilter').value = '';
+      document.getElementById('dateFilter').value = '';
+      loadPublicEvents();
+    });
+  }
+  
+  // Permetti ricerca con tasto Enter
+  ['searchFilter', 'categoryFilter', 'locationFilter', 'dateFilter'].forEach(id => {
+    const input = document.getElementById(id);
+    if (input) {
+      input.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          document.getElementById('applyFilters').click();
+        }
+      });
     }
   });
 });
