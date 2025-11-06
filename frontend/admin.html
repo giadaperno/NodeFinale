@@ -14,6 +14,10 @@
 <header>
   <h1>EventHub - Area Admin</h1>
   <div>
+    <span id="userInfo" style="margin-right: 15px; color: white; font-weight: 500;">
+      <i class="fas fa-user-shield"></i> <span id="userNameDisplay"></span>
+      <span id="userRoleDisplay" style="font-size: 0.85em; opacity: 0.9;"></span>
+    </span>
     <button id="notificationsBtn" onclick="toggleNotifications()">
       <span id="notificationBadge" class="badge" style="display:none;">0</span>
       Notifiche
@@ -56,22 +60,17 @@
 
 <div class="dashboard">
   <div class="box">
-    <h3>Eventi in attesa</h3>
+    <h3><i class="fas fa-clock"></i> Eventi in attesa di approvazione</h3>
     <div id="pendingEvents"></div>
   </div>
 
   <div class="box">
-    <h3>Tutti gli eventi</h3>
+    <h3><i class="fas fa-calendar-alt"></i> Tutti gli eventi</h3>
     <div id="allEvents"></div>
   </div>
 
   <div class="box">
-    <h3>Eventi pubblici</h3>
-    <div id="publicEvents"></div>
-  </div>
-
-  <div class="box">
-    <h3>Utenti</h3>
+    <h3><i class="fas fa-users"></i> Gestione utenti</h3>
     <div id="allUsers"></div>
   </div>
 </div>
@@ -81,9 +80,21 @@
 const token = localStorage.getItem('token');
 if (!token) window.location.href = '/login.html';
 
+// Mostra informazioni utente nell'header
+const userName = localStorage.getItem('userName');
+const userRole = localStorage.getItem('userRole');
+if (userName) {
+  document.getElementById('userNameDisplay').textContent = userName;
+}
+if (userRole) {
+  const roleText = userRole === 'admin' ? '(Admin)' : '(Utente)';
+  document.getElementById('userRoleDisplay').textContent = roleText;
+}
+
 // Verifica che sia un admin
 const payload = JSON.parse(atob(token.split('.')[1]));
 if (payload.role !== 'admin') {
+  alert('Accesso negato. Solo gli amministratori possono accedere a questa pagina.');
   window.location.href = '/user.html';
 }
 
@@ -144,6 +155,8 @@ async function fetchAuth(url, options = {}) {
 // Logout
 document.getElementById('logoutBtn').addEventListener('click', () => {
   localStorage.removeItem('token');
+  localStorage.removeItem('userName');
+  localStorage.removeItem('userRole');
   window.location.href = '/login.html';
 });
 
@@ -157,7 +170,7 @@ async function loadPendingEvents() {
   
   container.innerHTML = '';
   if (events.length === 0) {
-    container.innerHTML = '<p>Nessun evento in attesa di approvazione</p>';
+    container.innerHTML = '<p style="text-align: center; color: var(--text-light); padding: 20px;"><i class="fas fa-check-circle"></i> Nessun evento in attesa di approvazione</p>';
     return;
   }
   
@@ -166,22 +179,32 @@ async function loadPendingEvents() {
     const div = document.createElement('div');
     div.className = 'admin-event-card';
     div.innerHTML = `
-      <img src="${ev.image || '/assets/images/defaults/event-default.jpg'}" alt="${ev.title}">
+      <img src="${ev.image || 'https://via.placeholder.com/400x180/E9D5FF/6B46C1?text=EventHub'}" 
+           alt="${ev.title}" 
+           class="event-image"
+           onerror="this.src='https://via.placeholder.com/400x180/E9D5FF/6B46C1?text=EventHub'">
       <div class="event-info">
+        <span class="category-badge">${ev.category || 'Generale'}</span>
+        <span class="status-badge pending"><i class="fas fa-clock"></i> In attesa</span>
         <h4 class="event-title">${ev.title}</h4>
+        <p class="event-description">${ev.description ? (ev.description.length > 100 ? ev.description.substring(0, 100) + '...' : ev.description) : 'Nessuna descrizione'}</p>
         <div class="event-meta">
-          <span>${ev.category || 'Generale'}</span> • 
-          <span>${ev.location}</span>
-        </div>
-        <div class="event-meta">
-          <span>${eventDate.toLocaleDateString('it-IT', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
-        </div>
-        <div class="event-meta">
-          <span>Capacità: ${ev.capacity} persone</span>
+          <span><i class="fas fa-map-marker-alt"></i> ${ev.location}</span>
+          <span><i class="fas fa-calendar"></i> ${eventDate.toLocaleDateString('it-IT', { 
+            weekday: 'long', 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+          })}</span>
+          <span><i class="fas fa-users"></i> Capacità: ${ev.capacity} persone</span>
         </div>
         <div class="event-actions">
-          <button onclick="approveEvent(${ev.id})" class="primary">✓ Approva</button>
-          <button onclick="rejectEvent(${ev.id})" class="danger">✗ Rifiuta</button>
+          <button onclick="approveEvent(${ev.id})" class="primary">
+            <i class="fas fa-check"></i> Approva
+          </button>
+          <button onclick="rejectEvent(${ev.id})" class="danger">
+            <i class="fas fa-times"></i> Rifiuta
+          </button>
         </div>
       </div>
     `;
@@ -213,31 +236,44 @@ async function loadAllEvents() {
   
   container.innerHTML = '';
   if (events.length === 0) {
-    container.innerHTML = '<p>Nessun evento presente</p>';
+    container.innerHTML = '<p style="text-align: center; color: var(--text-light); padding: 20px;"><i class="fas fa-calendar-times"></i> Nessun evento presente</p>';
     return;
   }
   
   events.forEach(ev => {
     const eventDate = new Date(ev.date);
     const div = document.createElement('div');
-    div.className = 'admin-event-card';
+    div.className = 'admin-event-card all-events';
+    const approvedBadge = ev.isApproved 
+      ? '<span class="status-badge approved"><i class="fas fa-check-circle"></i> Approvato</span>'
+      : '<span class="status-badge pending"><i class="fas fa-clock"></i> In attesa</span>';
+    
     div.innerHTML = `
-      <img src="${ev.image || '/assets/images/defaults/event-default.jpg'}" alt="${ev.title}">
+      <img src="${ev.image || 'https://via.placeholder.com/400x180/E9D5FF/6B46C1?text=EventHub'}" 
+           alt="${ev.title}"
+           class="event-image"
+           onerror="this.src='https://via.placeholder.com/400x180/E9D5FF/6B46C1?text=EventHub'">
       <div class="event-info">
+        <span class="category-badge">${ev.category || 'Generale'}</span>
+        ${approvedBadge}
         <h4 class="event-title">${ev.title}</h4>
+        <p class="event-description">${ev.description ? (ev.description.length > 80 ? ev.description.substring(0, 80) + '...' : ev.description) : 'Nessuna descrizione'}</p>
         <div class="event-meta">
-          <span>Categoria: ${ev.category || 'Generale'}</span> 
-          <span>Luogo: ${ev.location}</span>
-        </div>
-        <div class="event-meta">
-          <span>Data: ${eventDate.toLocaleDateString('it-IT', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
-        </div>
-        <div class="event-meta">
-          <span>Capacità: ${ev.capacity} persone</span>
+          <span><i class="fas fa-map-marker-alt"></i> ${ev.location}</span>
+          <span><i class="fas fa-calendar"></i> ${eventDate.toLocaleDateString('it-IT', { 
+            day: 'numeric',
+            month: 'short',
+            year: 'numeric'
+          })}</span>
+          <span><i class="fas fa-users"></i> ${ev.capacity} posti</span>
         </div>
         <div class="event-actions">
-          <button onclick="window.location.href='/edit-event.html?id=${ev.id}'" class="secondary">Modifica</button>
-          <button onclick="deleteEvent(${ev.id})" class="danger">Elimina</button>
+          <button onclick="window.location.href='/edit-event.html?id=${ev.id}'" class="secondary">
+            <i class="fas fa-edit"></i> Modifica
+          </button>
+          <button onclick="deleteEvent(${ev.id})" class="danger">
+            <i class="fas fa-trash"></i> Elimina
+          </button>
         </div>
       </div>
     `;
@@ -253,20 +289,6 @@ async function deleteEvent(id) {
   updateStats();
 }
 
-// Carica eventi pubblici (come utenti)
-async function loadPublicEvents() {
-  const container = document.getElementById('publicEvents');
-  const events = await fetch('/api/events').then(r => r.json());
-  container.innerHTML = '';
-  events.forEach(ev => {
-    const div = document.createElement('div');
-    div.className = 'event-box';
-    div.innerHTML = `
-      <strong>${ev.title}</strong><br>${ev.category} - ${ev.location} - ${new Date(ev.date).toLocaleDateString()}`;
-    container.appendChild(div);
-  });
-}
-
 // Carica utenti
 async function loadUsers() {
   const container = document.getElementById('allUsers');
@@ -277,20 +299,40 @@ async function loadUsers() {
   
   container.innerHTML = '';
   if (users.length === 0) {
-    container.innerHTML = '<p>Nessun utente registrato</p>';
+    container.innerHTML = '<p style="text-align: center; color: var(--text-light); padding: 20px;"><i class="fas fa-users-slash"></i> Nessun utente registrato</p>';
     return;
   }
   
   users.forEach(u => {
     const div = document.createElement('div');
-    div.className = 'event-box';
+    div.className = 'user-card';
+    const roleColor = u.role === 'admin' ? 'role-admin' : 'role-user';
+    const statusBadge = u.isActive 
+      ? '<span class="status-active"><i class="fas fa-check-circle"></i> Attivo</span>'
+      : '<span class="status-blocked"><i class="fas fa-ban"></i> Bloccato</span>';
+    
     div.innerHTML = `
-      <strong>${u.name}</strong> <span style="background: var(--primary); color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem;">${u.role}</span><br>
-      ${u.email}<br>
-      Stato: ${u.isActive ? '<span style="color: green;">✓ Attivo</span>' : '<span style="color: red;">✗ Bloccato</span>'}<br>
-      <div style="margin-top: 10px; display: flex; gap: 8px;">
-        <button onclick="blockUser(${u.id})" class="danger" ${!u.isActive ? 'disabled' : ''}>Blocca</button>
-        <button onclick="unblockUser(${u.id})" class="secondary" ${u.isActive ? 'disabled' : ''}>Sblocca</button>
+      <div class="user-avatar">
+        <i class="fas fa-user-circle"></i>
+      </div>
+      <div class="user-info">
+        <h4 class="user-name">${u.name}</h4>
+        <div class="user-badges">
+          <span class="role-badge ${roleColor}">
+            <i class="fas ${u.role === 'admin' ? 'fa-user-shield' : 'fa-user'}"></i> 
+            ${u.role === 'admin' ? 'Admin' : 'Utente'}
+          </span>
+          ${statusBadge}
+        </div>
+        <p class="user-email"><i class="fas fa-envelope"></i> ${u.email}</p>
+        <div class="user-actions">
+          <button onclick="blockUser(${u.id})" class="btn-block" ${!u.isActive ? 'disabled' : ''}>
+            <i class="fas fa-ban"></i> Blocca
+          </button>
+          <button onclick="unblockUser(${u.id})" class="btn-unblock" ${u.isActive ? 'disabled' : ''}>
+            <i class="fas fa-unlock"></i> Sblocca
+          </button>
+        </div>
       </div>
     `;
     container.appendChild(div);
@@ -442,7 +484,6 @@ async function deleteReadNotifications() {
 // Carica tutto all'avvio
 loadPendingEvents();
 loadAllEvents();
-loadPublicEvents();
 loadUsers();
 updateNotificationBadge(); // Aggiorna il badge delle notifiche
 </script>

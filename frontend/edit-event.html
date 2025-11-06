@@ -5,75 +5,68 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>EventHub - Modifica Evento</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-<link rel="stylesheet" href="/css/edit-event.css">
+<link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
 
 <header>
-  <h1>EventHub</h1>
+  <h1><i class="fas fa-edit"></i> EventHub - Modifica Evento</h1>
   <button id="backBtn" class="secondary"><i class="fas fa-arrow-left"></i> Indietro</button>
 </header>
 
-<div class="edit-container">
-  <div class="form-header">
-    <i class="fas fa-edit"></i>
-    <h2>Modifica Evento</h2>
+<div class="auth-container">
+  <h2><i class="fas fa-pen"></i> Modifica evento</h2>
+  
+  <div class="form-group">
+    <label for="title"><i class="fas fa-heading"></i> Titolo evento *</label>
+    <input type="text" id="title" placeholder="Es: Concerto Rock 2025">
+  </div>
+
+  <div class="form-group">
+    <label for="description"><i class="fas fa-align-left"></i> Descrizione *</label>
+    <textarea id="description" placeholder="Descrivi il tuo evento..." rows="5"></textarea>
+  </div>
+
+  <div class="form-group">
+    <label for="category"><i class="fas fa-tag"></i> Categoria *</label>
+    <select id="category">
+      <option value="">Seleziona una categoria</option>
+      <option value="Musica">Musica</option>
+      <option value="Sport">Sport</option>
+      <option value="Fiera">Fiera</option>
+      <option value="Cucina">Cucina</option>
+      <option value="Benessere">Benessere</option>
+    </select>
+  </div>
+
+  <div class="form-group">
+    <label for="location"><i class="fas fa-map-marker-alt"></i> Luogo *</label>
+    <input type="text" id="location" placeholder="Es: Teatro Comunale, Milano">
+  </div>
+
+  <div class="form-group">
+    <label for="date"><i class="fas fa-calendar"></i> Data *</label>
+    <input type="date" id="date">
+  </div>
+
+  <div class="form-group">
+    <label for="capacity"><i class="fas fa-users"></i> Capacità massima *</label>
+    <input type="number" id="capacity" placeholder="Es: 100" min="1">
+  </div>
+
+  <div class="form-group">
+    <label for="image"><i class="fas fa-image"></i> URL Immagine (opzionale)</label>
+    <input type="url" id="image" placeholder="https://esempio.com/immagine.jpg" maxlength="2000">
+    <small style="color: var(--text-light); display: block; margin-top: 5px;">
+      <i class="fas fa-info-circle"></i> Incolla il link di un'immagine per rendere il tuo evento più unico
+    </small>
   </div>
   
-  <form id="editForm">
-    <div class="form-group">
-      <label for="title"><i class="fas fa-heading"></i> Titolo</label>
-      <input type="text" id="title" placeholder="Titolo evento" required>
-    </div>
+  <button id="updateBtn" class="primary">
+    <i class="fas fa-save"></i> Salva Modifiche
+  </button>
 
-    <div class="form-group">
-      <label for="description"><i class="fas fa-align-left"></i> Descrizione</label>
-      <textarea id="description" placeholder="Descrizione evento" rows="5" required></textarea>
-    </div>
-
-    <div class="form-row">
-      <div class="form-group">
-        <label for="category"><i class="fas fa-tag"></i> Categoria</label>
-        <select id="category" required>
-          <option value="">Seleziona una categoria</option>
-          <option value="Musica">Musica</option>
-          <option value="Sport">Sport</option>
-          <option value="Fiera">Fiera</option>
-          <option value="Concerto">Concerto</option>
-          <option value="Cucina">Cucina</option>
-          <option value="Benessere">Benessere</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label for="location"><i class="fas fa-map-marker-alt"></i> Luogo</label>
-        <input type="text" id="location" placeholder="Dove si svolge" required>
-      </div>
-    </div>
-
-    <div class="form-row">
-      <div class="form-group">
-        <label for="date"><i class="fas fa-calendar"></i> Data</label>
-        <input type="date" id="date" required>
-      </div>
-
-      <div class="form-group">
-        <label for="capacity"><i class="fas fa-users"></i> Capacità</label>
-        <input type="number" id="capacity" placeholder="Numero massimo partecipanti" min="1" required>
-      </div>
-    </div>
-
-    <div class="form-group">
-      <label for="image"><i class="fas fa-image"></i> URL Immagine (opzionale)</label>
-      <input type="url" id="image" placeholder="https://esempio.com/immagine.jpg" maxlength="500">
-    </div>
-    
-    <button type="submit" id="updateBtn" class="primary">
-      <i class="fas fa-save"></i> Salva Modifiche
-    </button>
-
-    <div id="message"></div>
-  </form>
+  <div id="message" style="margin-top:15px;"></div>
 </div>
 
 <script>
@@ -115,25 +108,61 @@ async function loadEvent() {
 loadEvent();
 
 // Aggiorna evento
-document.getElementById('editForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  
-  const event = {
-    title: document.getElementById('title').value,
-    description: document.getElementById('description').value,
-    category: document.getElementById('category').value,
-    location: document.getElementById('location').value,
-    date: document.getElementById('date').value,
-    capacity: document.getElementById('capacity').value,
-    image: document.getElementById('image').value
-  };
+document.getElementById('updateBtn').addEventListener('click', async () => {
+  const title = document.getElementById('title').value.trim();
+  const description = document.getElementById('description').value.trim();
+  const category = document.getElementById('category').value;
+  const location = document.getElementById('location').value.trim();
+  const date = document.getElementById('date').value;
+  const capacity = document.getElementById('capacity').value;
+  const image = document.getElementById('image').value.trim();
 
   const messageDiv = document.getElementById('message');
+  messageDiv.textContent = '';
+  messageDiv.className = '';
+
+  const errors = [];
+
+  // Client-side validation
+  if (!title) {
+    errors.push('❌ Il titolo dell\'evento è obbligatorio.');
+  }
+  if (!description) {
+    errors.push('❌ La descrizione dell\'evento è obbligatoria.');
+  }
+  if (!category) {
+    errors.push('❌ Seleziona una categoria.');
+  }
+  if (!location) {
+    errors.push('❌ Il luogo è obbligatorio.');
+  }
+  if (!date) {
+    errors.push('❌ La data è obbligatoria.');
+  }
+  if (!capacity || isNaN(capacity) || parseInt(capacity) <= 0) {
+    errors.push('❌ Inserisci una capacità valida (numero positivo).');
+  }
+
+  if (errors.length > 0) {
+    messageDiv.innerHTML = errors.join('<br>');
+    return;
+  }
+
   const updateBtn = document.getElementById('updateBtn');
   
   // Disabilita il pulsante durante l'invio
   updateBtn.disabled = true;
   updateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvataggio...';
+
+  const event = {
+    title,
+    description,
+    category,
+    location,
+    date,
+    capacity: parseInt(capacity),
+    image
+  };
 
   try {
     const res = await fetch(`/api/events/${eventId}`, {
@@ -148,18 +177,16 @@ document.getElementById('editForm').addEventListener('submit', async (e) => {
     const data = await res.json();
 
     if (res.ok) {
-      messageDiv.className = 'success-message';
-      messageDiv.innerHTML = '<i class="fas fa-check-circle"></i> Evento aggiornato con successo!';
+      messageDiv.className = 'success';
+      messageDiv.innerHTML = '<i class="fas fa-check-circle"></i> Evento aggiornato con successo! Reindirizzamento...';
       setTimeout(() => window.location.href = '/user.html', 1500);
     } else {
-      messageDiv.className = 'error-message';
       messageDiv.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${data.message || 'Ops! Non siamo riusciti ad aggiornare l\'evento'}`;
       updateBtn.disabled = false;
       updateBtn.innerHTML = '<i class="fas fa-save"></i> Salva Modifiche';
     }
   } catch(err) {
     console.error(err);
-    messageDiv.className = 'error-message';
     messageDiv.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Qualcosa è andato storto. Riprova tra poco!';
     updateBtn.disabled = false;
     updateBtn.innerHTML = '<i class="fas fa-save"></i> Salva Modifiche';

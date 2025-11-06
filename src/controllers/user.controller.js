@@ -182,3 +182,34 @@ export const getUserProfile = async (req, res) => {
     res.status(500).json({ message: "Errore server", error: error.message });
   }
 };
+
+/**
+ * TEMPORANEO: Promuovi utente ad admin (solo per sviluppo)
+ * Endpoint: PATCH /api/users/promote-to-admin/:id
+ */
+export const promoteToAdmin = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const user = await User.findByPk(id);
+    if (!user) {
+      return res.status(404).json({ message: "Utente non trovato" });
+    }
+
+    user.role = 'admin';
+    await user.save();
+
+    res.json({ 
+      message: `Utente ${user.name} promosso ad admin con successo`,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role
+      }
+    });
+  } catch (error) {
+    console.error("Errore promoteToAdmin:", error);
+    res.status(500).json({ message: "Errore server", error: error.message });
+  }
+};

@@ -4,37 +4,69 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>EventHub - Crea Evento</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
 
 <header>
-  <h1>EventHub - Crea Evento</h1>
-  <button id="backBtn" class="secondary">Indietro</button>
+  <h1><i class="fas fa-calendar-plus"></i> EventHub - Crea Evento</h1>
+  <button id="backBtn" class="secondary"><i class="fas fa-arrow-left"></i> Indietro</button>
 </header>
 
 <div class="auth-container">
-  <h2>Crea un nuovo evento</h2>
+  <h2><i class="fas fa-sparkles"></i> Crea un nuovo evento</h2>
   
-  <input type="text" id="title" placeholder="Titolo evento">
-  <textarea id="description" placeholder="Descrizione evento"></textarea>
-  <select id="category">
-    <option value="">Seleziona una categoria</option>
-    <option value="Musica">Musica</option>
-    <option value="Sport">Sport</option>
-    <option value="Fiera">Fiera</option>
-    <option value="Concerto">Concerto</option>
-    <option value="Cucina">Cucina</option>
-    <option value="Benessere">Benessere</option>
-  </select>
-  <input type="text" id="location" placeholder="Luogo">
-  <input type="date" id="date">
-  <input type="number" id="capacity" placeholder="Capacità">
-  <input type="url" id="image" placeholder="URL immagine (opzionale)" maxlength="500" style="width: 100%;">
-  
-  <button id="createBtn" class="primary">Crea Evento</button>
+  <div class="form-group">
+    <label for="title"><i class="fas fa-heading"></i> Titolo evento *</label>
+    <input type="text" id="title" placeholder="Es: Concerto Rock 2025">
+  </div>
 
-  <div id="message" style="color:red; margin-top:10px;"></div>
+  <div class="form-group">
+    <label for="description"><i class="fas fa-align-left"></i> Descrizione *</label>
+    <textarea id="description" placeholder="Descrivi il tuo evento..." rows="5"></textarea>
+  </div>
+
+  <div class="form-group">
+    <label for="category"><i class="fas fa-tag"></i> Categoria *</label>
+    <select id="category">
+      <option value="">Seleziona una categoria</option>
+      <option value="Musica">Musica</option>
+      <option value="Sport">Sport</option>
+      <option value="Fiera">Fiera</option>
+      <option value="Cucina">Cucina</option>
+      <option value="Benessere">Benessere</option>
+    </select>
+  </div>
+
+  <div class="form-group">
+    <label for="location"><i class="fas fa-map-marker-alt"></i> Luogo *</label>
+    <input type="text" id="location" placeholder="Es: Teatro Comunale, Milano">
+  </div>
+
+  <div class="form-group">
+    <label for="date"><i class="fas fa-calendar"></i> Data *</label>
+    <input type="date" id="date">
+  </div>
+
+  <div class="form-group">
+    <label for="capacity"><i class="fas fa-users"></i> Capacità massima *</label>
+    <input type="number" id="capacity" placeholder="Es: 100" min="1">
+  </div>
+
+  <div class="form-group">
+    <label for="image"><i class="fas fa-image"></i> URL Immagine (opzionale)</label>
+    <input type="url" id="image" placeholder="https://esempio.com/immagine.jpg" maxlength="2000">
+    <small style="color: var(--text-light); display: block; margin-top: 5px;">
+      <i class="fas fa-info-circle"></i> Incolla il link di un'immagine per rendere il tuo evento più unico
+    </small>
+  </div>
+  
+  <button id="createBtn" class="primary">
+    <i class="fas fa-plus-circle"></i> Crea Evento
+  </button>
+
+  <div id="message" style="margin-top:15px;"></div>
 </div>
 
 <script>
@@ -42,44 +74,49 @@ const token = localStorage.getItem('token');
 if (!token) window.location.href = '/login.html';
 
 document.getElementById('createBtn').addEventListener('click', async () => {
-  const title = document.getElementById('title').value;
-  const description = document.getElementById('description').value;
+  const title = document.getElementById('title').value.trim();
+  const description = document.getElementById('description').value.trim();
   const category = document.getElementById('category').value;
-  const location = document.getElementById('location').value;
+  const location = document.getElementById('location').value.trim();
   const date = document.getElementById('date').value;
   const capacity = document.getElementById('capacity').value;
-  const image = document.getElementById('image').value;
+  const image = document.getElementById('image').value.trim();
 
   const messageDiv = document.getElementById('message');
-  messageDiv.textContent = ''; // Clear previous messages
-  messageDiv.style.color = 'red';
+  messageDiv.textContent = '';
+  messageDiv.className = '';
 
   const errors = [];
 
   // Client-side validation
   if (!title) {
-    errors.push('Il titolo dell\'evento è obbligatorio.');
+    errors.push('❌ Il titolo dell\'evento è obbligatorio.');
   }
   if (!description) {
-    errors.push('La descrizione dell\'evento è obbligatoria.');
+    errors.push('❌ La descrizione dell\'evento è obbligatoria.');
   }
   if (!category) {
-    errors.push('La categoria è obbligatoria.');
+    errors.push('❌ Seleziona una categoria.');
   }
   if (!location) {
-    errors.push('Il luogo è obbligatorio.');
+    errors.push('❌ Il luogo è obbligatorio.');
   }
   if (!date) {
-    errors.push('La data è obbligatoria.');
+    errors.push('❌ La data è obbligatoria.');
   }
   if (!capacity || isNaN(capacity) || parseInt(capacity) <= 0) {
-    errors.push('La capacità è obbligatoria e deve essere un numero positivo.');
+    errors.push('❌ Inserisci una capacità valida (numero positivo).');
   }
 
   if (errors.length > 0) {
     messageDiv.innerHTML = errors.join('<br>');
     return;
   }
+
+  // Disabilita il pulsante durante l'invio
+  const createBtn = document.getElementById('createBtn');
+  createBtn.disabled = true;
+  createBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creazione in corso...';
 
   const event = {
     title,
@@ -102,21 +139,21 @@ document.getElementById('createBtn').addEventListener('click', async () => {
     });
 
     const data = await res.json();
-    const messageDiv = document.getElementById('message');
 
     if (res.ok) {
-      messageDiv.style.color = 'green';
-      messageDiv.textContent = 'Evento creato con successo!';
+      messageDiv.className = 'success';
+      messageDiv.innerHTML = '<i class="fas fa-check-circle"></i> Evento creato con successo! Reindirizzamento...';
       setTimeout(() => window.location.href = '/user.html', 1500);
     } else {
-      messageDiv.style.color = 'red';
-      messageDiv.textContent = data.message || 'Ops! Non siamo riusciti a creare l\'evento';
+      messageDiv.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${data.message || 'Ops! Non siamo riusciti a creare l\'evento'}`;
+      createBtn.disabled = false;
+      createBtn.innerHTML = '<i class="fas fa-plus-circle"></i> Crea Evento';
     }
   } catch(err) {
     console.error(err);
-    const messageDiv = document.getElementById('message');
-    messageDiv.style.color = 'red';
-    messageDiv.textContent = 'Qualcosa è andato storto. Riprova tra poco!';
+    messageDiv.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Qualcosa è andato storto. Riprova tra poco!';
+    createBtn.disabled = false;
+    createBtn.innerHTML = '<i class="fas fa-plus-circle"></i> Crea Evento';
   }
 });
 

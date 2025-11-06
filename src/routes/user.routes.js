@@ -5,7 +5,8 @@ import {
   updateMyProfile,
   changePassword,
   deleteMyAccount,
-  getUserProfile
+  getUserProfile,
+  promoteToAdmin
 } from "../controllers/user.controller.js";
 
 const router = express.Router();
@@ -21,6 +22,9 @@ router.put("/me/password", verifyToken, changePassword);
 
 // Elimina account
 router.delete("/me", verifyToken, deleteMyAccount);
+
+// TEMPORANEO: Promuovi utente ad admin (solo per sviluppo - da rimuovere in produzione)
+router.patch("/promote-to-admin/:id", promoteToAdmin);
 
 // Profilo pubblico di un utente (opzionale, può essere usato per mostrare chi ha creato un evento)
 router.get("/:id", getUserProfile);

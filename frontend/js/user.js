@@ -58,6 +58,8 @@ document.getElementById("logoutBtn").addEventListener("click", () => {
     socket.disconnect();
   }
   localStorage.removeItem("token");
+  localStorage.removeItem("userName");
+  localStorage.removeItem("userRole");
   window.location.href = "/login.html";
 });
 
@@ -120,7 +122,10 @@ async function loadPublicEvents(filters = {}) {
       box.className = "event-box";
       box.setAttribute("data-event-id", event.id);
       box.innerHTML = `
-        <img src="${event.image || '/assets/images/defaults/event-default.jpg'}" alt="${event.title}" class="event-image">
+        <img src="${event.image || '/assets/images/defaults/event-default.jpg'}" 
+             alt="${event.title}" 
+             class="event-image"
+             onerror="this.src='https://via.placeholder.com/400x180/E9D5FF/6B46C1?text=EventHub'">
         <div class="event-content">
           <div>
             <span class="category-badge">${event.category || 'Generale'}</span>

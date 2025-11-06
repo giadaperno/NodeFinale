@@ -50,7 +50,7 @@ export const login = async (req, res) => {
   try {
     const user = await User.findOne({ where: { email } });
     if (!user)
-      return res.status(400).json({ message: "Email o password non validi" });
+      return res.status(400).json({ message: "Email non trovata" });
 
     if (!user.isActive)
       return res.status(403).json({ message: "Account bloccato" });

@@ -37,13 +37,30 @@
 </div>
 
 <div class="box" style="margin: 40px auto; max-width: 1300px;">
-  <h2>Eventi in evidenza</h2>
+  <h2><i class="fas fa-fire"></i> Eventi in evidenza</h2>
   <div class="filters">
-    <input type="text" id="categoryFilter" placeholder="Categoria">
-    <input type="text" id="locationFilter" placeholder="Luogo">
-    <input type="date" id="dateFilter">
-    <button id="applyFilters">Applica Filtri</button>
-    <button id="clearFilters" class="secondary">Reset Filtri</button>
+    <div class="filter-group">
+      <i class="fas fa-search"></i>
+      <input type="text" id="searchFilter" placeholder="Cerca per titolo...">
+    </div>
+    <div class="filter-group">
+      <i class="fas fa-tag"></i>
+      <input type="text" id="categoryFilter" placeholder="Categoria">
+    </div>
+    <div class="filter-group">
+      <i class="fas fa-map-marker-alt"></i>
+      <input type="text" id="locationFilter" placeholder="Luogo">
+    </div>
+    <div class="filter-group">
+      <i class="fas fa-calendar"></i>
+      <input type="date" id="dateFilter">
+    </div>
+    <button id="applyFilters" class="primary">
+      <i class="fas fa-search"></i> Cerca
+    </button>
+    <button id="clearFilters" class="secondary">
+      <i class="fas fa-times"></i> Pulisci
+    </button>
   </div>
   <div class="events" id="eventsContainer"></div>
 </div>
@@ -66,7 +83,10 @@ async function loadEvents(filters = {}) {
     const box = document.createElement('div');
     box.className = 'event-box';
     box.innerHTML = `
-      <img src="${event.image || '/assets/images/defaults/event-default.jpg'}" alt="${event.title}" class="event-image">
+      <img src="${event.image || 'https://via.placeholder.com/400x180/E9D5FF/6B46C1?text=EventHub'}" 
+           alt="${event.title}" 
+           class="event-image"
+           onerror="this.src='https://via.placeholder.com/400x180/E9D5FF/6B46C1?text=EventHub'">
       <div class="event-content">
         <span class="category-badge">${event.category || 'Generale'}</span>
         <h3 class="event-title">${event.title}</h3>
@@ -134,6 +154,7 @@ async function registerEvent(eventId, eventTitle) {
 // Filtri
 document.getElementById('applyFilters').addEventListener('click', () => {
   const filters = {
+    search: document.getElementById('searchFilter').value,
     category: document.getElementById('categoryFilter').value,
     location: document.getElementById('locationFilter').value,
     date: document.getElementById('dateFilter').value
@@ -142,6 +163,7 @@ document.getElementById('applyFilters').addEventListener('click', () => {
 });
 
 document.getElementById('clearFilters').addEventListener('click', () => {
+  document.getElementById('searchFilter').value = '';
   document.getElementById('categoryFilter').value = '';
   document.getElementById('locationFilter').value = '';
   document.getElementById('dateFilter').value = '';
@@ -172,7 +194,7 @@ async function showEventDetails(eventId) {
         </button>
         
         <div class="modal-header">
-          ${event.image ? `<img src="${event.image}" alt="${event.title}" class="modal-event-image">` : ''}
+          ${event.image ? `<img src="${event.image}" alt="${event.title}" class="modal-event-image" onerror="this.src='https://via.placeholder.com/800x300/E9D5FF/6B46C1?text=EventHub'">` : ''}
           <div class="modal-title-section">
             <h2>${event.title}</h2>
             <div class="modal-badges">

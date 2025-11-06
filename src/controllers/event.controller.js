@@ -46,7 +46,31 @@ export const createEvent = async (req, res) => {
     res.status(201).json({ message: "Evento creato con successo", event });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Errore server", error: error.message });
+    
+    // Gestisci errori specifici del database
+    if (error.name === 'SequelizeValidationError') {
+      return res.status(400).json({ 
+        message: "Dati non validi. Controlla che tutti i campi siano corretti.",
+        details: error.errors.map(e => e.message)
+      });
+    }
+    
+    if (error.name === 'SequelizeDatabaseError') {
+      // Errore specifico per URL troppo lungo
+      if (error.message.includes('too long') || error.message.includes('Data too long')) {
+        return res.status(400).json({ 
+          message: "L'URL dell'immagine è troppo lungo. Riprova con un URL più corto."
+        });
+      }
+      return res.status(400).json({ 
+        message: "Errore nel salvataggio dei dati. Verifica che tutti i campi siano corretti."
+      });
+    }
+    
+    res.status(500).json({ 
+      message: "Si è verificato un errore durante la creazione dell'evento. Riprova più tardi.",
+      error: error.message 
+    });
   }
 };
 

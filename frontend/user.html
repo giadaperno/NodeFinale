@@ -12,6 +12,10 @@
 <header>
   <h1><i class="fas fa-calendar-alt"></i> EventHub</h1>
   <div>
+    <span id="userInfo" style="margin-right: 15px; color: white; font-weight: 500;">
+      <i class="fas fa-user"></i> <span id="userNameDisplay"></span>
+      <span id="userRoleDisplay" style="font-size: 0.85em; opacity: 0.9;"></span>
+    </span>
     <button id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button>
   </div>
 </header>
@@ -36,10 +40,22 @@
   
   <!-- Barra dei filtri -->
   <div class="filters">
-    <input type="text" id="searchFilter" placeholder="Cerca per titolo..." />
-    <input type="text" id="categoryFilter" placeholder="Categoria (es: Musica)" />
-    <input type="text" id="locationFilter" placeholder="Luogo (es: Milano)" />
-    <input type="date" id="dateFilter" placeholder="Data" />
+    <div class="filter-group">
+      <i class="fas fa-search"></i>
+      <input type="text" id="searchFilter" placeholder="Cerca per titolo...">
+    </div>
+    <div class="filter-group">
+      <i class="fas fa-tag"></i>
+      <input type="text" id="categoryFilter" placeholder="Categoria">
+    </div>
+    <div class="filter-group">
+      <i class="fas fa-map-marker-alt"></i>
+      <input type="text" id="locationFilter" placeholder="Luogo">
+    </div>
+    <div class="filter-group">
+      <i class="fas fa-calendar"></i>
+      <input type="date" id="dateFilter">
+    </div>
     <button id="applyFilters" class="primary">
       <i class="fas fa-search"></i> Cerca
     </button>
@@ -52,6 +68,18 @@
 </div>
 
 <script src="/socket.io/socket.io.js"></script>
+<script>
+// Mostra informazioni utente nell'header
+const userName = localStorage.getItem('userName');
+const userRole = localStorage.getItem('userRole');
+if (userName) {
+  document.getElementById('userNameDisplay').textContent = userName;
+}
+if (userRole) {
+  const roleText = userRole === 'admin' ? '(Admin)' : '(Utente)';
+  document.getElementById('userRoleDisplay').textContent = roleText;
+}
+</script>
 <script src="/js/user.js"></script>
 </body>
 </html>

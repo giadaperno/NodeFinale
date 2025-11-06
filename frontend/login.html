@@ -56,8 +56,10 @@ async function handleLogin() {
     const messageDiv = document.getElementById('message');
 
     if (res.ok) {
-      // Salva token
+      // Salva token e info utente
       localStorage.setItem('token', data.token);
+      localStorage.setItem('userName', data.user.name);
+      localStorage.setItem('userRole', data.user.role);
 
       // Reindirizza in base al ruolo
         if (data.user.role === 'admin') {
@@ -66,7 +68,7 @@ async function handleLogin() {
             window.location.href = '/user.html';
         }
     } else {
-      messageDiv.textContent = data.message || 'Ops! Credenziali non corrette';
+      messageDiv.textContent = data.message;
     }
   } catch (err) {
     console.error(err);

@@ -98,56 +98,267 @@
 /* Card eventi migliorate */
 .admin-event-card {
   background: white;
-  border-radius: 10px;
-  padding: 15px;
-  margin-bottom: 15px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  border-radius: 12px;
+  padding: 0;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(107, 70, 193, 0.1);
   display: flex;
-  gap: 15px;
-  transition: transform 0.2s, box-shadow 0.2s;
+  overflow: hidden;
+  transition: transform 0.3s, box-shadow 0.3s;
+  border: 1px solid #f0f0f0;
 }
 
 .admin-event-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(107, 70, 193, 0.2);
 }
 
 .admin-event-card img {
-  width: 120px;
-  height: 120px;
+  width: 180px;
+  height: 180px;
   object-fit: cover;
-  border-radius: 8px;
   flex-shrink: 0;
 }
 
 .admin-event-card .event-info {
   flex: 1;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
   min-width: 0;
 }
 
 .admin-event-card .event-title {
-  font-size: 1.2rem;
-  font-weight: bold;
+  font-size: 1.3rem;
+  font-weight: 700;
   color: var(--primary-dark);
-  margin: 0 0 5px 0;
+  margin: 0;
   word-wrap: break-word;
   overflow-wrap: break-word;
 }
 
+.admin-event-card .event-description {
+  color: #666;
+  font-size: 0.95rem;
+  margin: 0;
+  line-height: 1.5;
+}
+
 .admin-event-card .event-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
   color: #666;
   font-size: 0.9rem;
-  margin: 5px 0;
+}
+
+.admin-event-card .event-meta span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.admin-event-card .event-meta i {
+  color: var(--primary);
 }
 
 .admin-event-card .event-actions {
   display: flex;
-  gap: 8px;
-  margin-top: 10px;
-  justify-content: flex-end;
+  gap: 10px;
+  margin-top: auto;
+  padding-top: 10px;
 }
 
 .admin-event-card .event-actions button {
-  padding: 8px 15px;
+  padding: 10px 20px;
+  font-size: 0.9rem;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.admin-event-card button.danger {
+  background: linear-gradient(135deg, #9F7AEA 0%, #805AD5 100%);
+  color: white;
+}
+
+.admin-event-card button.danger:hover {
+  background: linear-gradient(135deg, #805AD5 0%, #6B46C1 100%);
+}
+
+/* Badge categoria e stato */
+.admin-event-card .category-badge,
+.admin-event-card .status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-right: 8px;
+}
+
+.admin-event-card .category-badge {
+  background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary) 100%);
+  color: white;
+}
+
+.admin-event-card .status-badge.pending {
+  background: linear-gradient(135deg, #B794F4 0%, #9F7AEA 100%);
+  color: white;
+}
+
+.admin-event-card .status-badge.approved {
+  background: linear-gradient(135deg, #48BB78 0%, #38A169 100%);
+  color: white;
+}
+
+/* Stili per card utenti */
+.user-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 15px;
+  box-shadow: 0 2px 8px rgba(107, 70, 193, 0.1);
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  transition: transform 0.3s, box-shadow 0.3s;
+  border: 1px solid #f0f0f0;
+}
+
+.user-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(107, 70, 193, 0.15);
+}
+
+.user-avatar {
+  font-size: 4rem;
+  color: var(--primary);
+  flex-shrink: 0;
+}
+
+.user-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.user-name {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--primary-dark);
+  margin: 0 0 8px 0;
+}
+
+.user-badges {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.role-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 15px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.role-badge.role-admin {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  color: white;
+}
+
+.role-badge.role-user {
+  background: linear-gradient(135deg, #B794F4 0%, #9F7AEA 100%);
+  color: white;
+}
+
+.status-active {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 15px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: linear-gradient(135deg, #48BB78 0%, #38A169 100%);
+  color: white;
+}
+
+.status-blocked {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 15px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: linear-gradient(135deg, #E53E3E 0%, #C53030 100%);
+  color: white;
+}
+
+.user-email {
+  color: #666;
+  font-size: 0.9rem;
+  margin: 8px 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.user-email i {
+  color: var(--primary);
+}
+
+.user-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.user-actions button {
+  padding: 8px 16px;
   font-size: 0.85rem;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.btn-block {
+  background: linear-gradient(135deg, #9F7AEA 0%, #805AD5 100%);
+  color: white;
+  border: none;
+}
+
+.btn-block:hover:not(:disabled) {
+  background: linear-gradient(135deg, #805AD5 0%, #6B46C1 100%);
+  transform: translateY(-2px);
+}
+
+.btn-unblock {
+  background: transparent;
+  color: var(--primary);
+  border: 2px solid var(--primary);
+}
+
+.btn-unblock:hover:not(:disabled) {
+  background: var(--primary);
+  color: white;
+  transform: translateY(-2px);
+}
+
+.user-actions button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
