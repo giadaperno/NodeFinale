@@ -1,5 +1,5 @@
 import express from "express";
-import { verifyToken } from "../middleware/auth.middleware.js";
+import { verifyToken } from "../middleware/verifyToken.js";
 import {
   createEvent,
   listEvents,

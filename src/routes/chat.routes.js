@@ -1,6 +1,6 @@
 import express from "express";
 import { sendMessage, getEventMessages } from "../controllers/chat.controller.js";
-import { verifyToken } from "../middleware/auth.middleware.js";
+import { verifyToken } from "../middleware/verifyToken.js";
 
 const router = express.Router();
 

@@ -3,7 +3,8 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-// Verifica token
+// Verifica token (DEPRECATO - Usare verifyToken.js invece)
+// Questo file è mantenuto solo per retrocompatibilità
 export const verifyToken = (req, res, next) => {
   const authHeader = req.headers["authorization"];
   const token = authHeader && authHeader.split(" ")[1];
@@ -15,10 +16,4 @@ export const verifyToken = (req, res, next) => {
     req.user = user;
     next();
   });
-};
-
-// Verifica admin
-export const isAdmin = (req, res, next) => {
-  if (req.user.role !== "admin") return res.status(403).json({ message: "Accesso riservato agli admin" });
-  next();
 };
