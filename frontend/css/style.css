@@ -375,6 +375,10 @@ h3 {
   color: var(--primary);
 }
 
+.creator-name {
+  color: var(--primary-dark);
+}
+
 .event-description {
   color: var(--text-dark);
   margin-bottom: 15px; /* Margine inferiore leggermente ridotto */

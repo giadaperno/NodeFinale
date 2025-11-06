@@ -91,18 +91,14 @@ async function loadPublicEvents() {
           <h3 class="event-title">${event.title}</h3>
           
           <div class="event-meta">
-            <span><i class="fas fa-user"></i> Creato da: <strong>${event.creatorName || 'Sconosciuto'}</strong></span>
-            <span><i class="fas fa-map-marker-alt"></i> ${event.location}</span>
-            <span><i class="fas fa-calendar"></i> ${eventDate.toLocaleDateString('it-IT', { 
-              weekday: 'long', 
+            <span><i class="fas fa-user"></i> Creato da: <span class="creator-name">${event.creatorName || 'Sconosciuto'}</span></span>
+            <span><i class="fas fa-calendar"></i> Quando: ${eventDate.toLocaleDateString('it-IT', { 
+              weekday: 'long',
               year: 'numeric', 
               month: 'long', 
               day: 'numeric'
             })}</span>
-            <span><i class="fas fa-clock"></i> ${eventDate.toLocaleTimeString('it-IT', { 
-              hour: '2-digit', 
-              minute: '2-digit'
-            })}</span>
+            <span><i class="fas fa-map-marker-alt"></i> Dove: ${event.location}</span>
           </div>
 
           <p class="event-description">${event.description || 'Nessuna descrizione disponibile'}</p>
@@ -191,13 +187,14 @@ async function loadMyCreatedEvents() {
                 <h3 class="event-title">${e.title}</h3>
                 
                 <div class="event-meta">
-                  <span><i class="fas fa-map-marker-alt"></i> ${e.location}</span>
-                  <span><i class="fas fa-calendar"></i> ${eventDate.toLocaleDateString('it-IT', { 
-                    weekday: 'long', 
+                  <span><i class="fas fa-user"></i> Creato da: <span class="creator-name">${e.creatorName || 'Sconosciuto'}</span></span>
+                  <span><i class="fas fa-calendar"></i> Quando: ${eventDate.toLocaleDateString('it-IT', { 
+                    weekday: 'long',
                     year: 'numeric', 
                     month: 'long', 
                     day: 'numeric'
                   })}</span>
+                  <span><i class="fas fa-map-marker-alt"></i> Dove: ${e.location}</span>
                 </div>
 
                 <div class="capacity-indicator">
@@ -246,14 +243,14 @@ async function loadMyRegisteredEvents() {
                 <h3 class="event-title">${e.title}</h3>
                 
                 <div class="event-meta">
-                  <span><i class="fas fa-user"></i> Creato da: <strong>${e.creatorName || 'Sconosciuto'}</strong></span>
-                  <span><i class="fas fa-map-marker-alt"></i> ${e.location}</span>
-                  <span><i class="fas fa-calendar"></i> ${eventDate.toLocaleDateString('it-IT', { 
-                    weekday: 'long', 
+                  <span><i class="fas fa-user"></i> Creato da: <span class="creator-name">${e.creatorName || 'Sconosciuto'}</span></span>
+                  <span><i class="fas fa-calendar"></i> Quando: ${eventDate.toLocaleDateString('it-IT', { 
+                    weekday: 'long',
                     year: 'numeric', 
                     month: 'long', 
                     day: 'numeric'
                   })}</span>
+                  <span><i class="fas fa-map-marker-alt"></i> Dove: ${e.location}</span>
                 </div>
 
                 <p class="event-description">${e.description || 'Nessuna descrizione disponibile'}</p>
