@@ -91,6 +91,7 @@ async function loadPublicEvents() {
           <h3 class="event-title">${event.title}</h3>
           
           <div class="event-meta">
+            <span><i class="fas fa-user"></i> Creato da: <strong>${event.creatorName || 'Sconosciuto'}</strong></span>
             <span><i class="fas fa-map-marker-alt"></i> ${event.location}</span>
             <span><i class="fas fa-calendar"></i> ${eventDate.toLocaleDateString('it-IT', { 
               weekday: 'long', 
@@ -245,6 +246,7 @@ async function loadMyRegisteredEvents() {
                 <h3 class="event-title">${e.title}</h3>
                 
                 <div class="event-meta">
+                  <span><i class="fas fa-user"></i> Creato da: <strong>${e.creatorName || 'Sconosciuto'}</strong></span>
                   <span><i class="fas fa-map-marker-alt"></i> ${e.location}</span>
                   <span><i class="fas fa-calendar"></i> ${eventDate.toLocaleDateString('it-IT', { 
                     weekday: 'long', 

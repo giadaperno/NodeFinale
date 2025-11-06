@@ -93,11 +93,16 @@ export const getUserRegisteredEvents = async (req, res) => {
       where: { UserId: userId },
       include: [{
         model: Event,
-        attributes: ['id', 'title', 'description', 'date', 'location', 'category', 'image', 'capacity']
+        attributes: ['id', 'title', 'description', 'date', 'location', 'category', 'image', 'capacity', 'UserId'],
+        include: [{
+          model: User,
+          as: "creator",
+          attributes: ['id', 'name']
+        }]
       }]
     });
 
-    // Aggiungi il conteggio dei partecipanti per ogni evento
+    // Aggiungi il conteggio dei partecipanti e il nome del creatore per ogni evento
     const eventsWithCount = await Promise.all(
       registrations.map(async (reg) => {
         const event = reg.Event.toJSON();
@@ -106,6 +111,8 @@ export const getUserRegisteredEvents = async (req, res) => {
           where: { EventId: event.id } 
         });
         event.participantCount = participantCount;
+        event.creatorName = event.creator ? event.creator.name : 'Sconosciuto';
+        delete event.creator;
         return event;
       })
     );

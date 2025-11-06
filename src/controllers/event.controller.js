@@ -70,19 +70,28 @@ export const listEvents = async (req, res) => {
 
     const events = await Event.findAll({
       where: filters,
-      include: [{
-        model: User,
-        as: "participants",
-        attributes: ['id'],
-        through: { attributes: [] }
-      }]
+      include: [
+        {
+          model: User,
+          as: "participants",
+          attributes: ['id'],
+          through: { attributes: [] }
+        },
+        {
+          model: User,
+          as: "creator",
+          attributes: ['id', 'name']
+        }
+      ]
     });
 
-    // Aggiungi il conteggio partecipanti
+    // Aggiungi il conteggio partecipanti e il nome del creatore
     const eventsWithCount = events.map(event => {
       const eventData = event.toJSON();
       eventData.participantCount = eventData.participants ? eventData.participants.length : 0;
+      eventData.creatorName = eventData.creator ? eventData.creator.name : 'Sconosciuto';
       delete eventData.participants;
+      delete eventData.creator;
       return eventData;
     });
 
@@ -99,20 +108,29 @@ export const getEventById = async (req, res) => {
   try {
     const event = await Event.findOne({
       where: { id },
-      include: [{
-        model: User,
-        as: "participants",
-        attributes: ['id'],
-        through: { attributes: [] }
-      }]
+      include: [
+        {
+          model: User,
+          as: "participants",
+          attributes: ['id'],
+          through: { attributes: [] }
+        },
+        {
+          model: User,
+          as: "creator",
+          attributes: ['id', 'name']
+        }
+      ]
     });
 
     if (!event) return res.status(404).json({ message: "Evento non trovato" });
     
-    // Aggiungi il conteggio partecipanti
+    // Aggiungi il conteggio partecipanti e il nome del creatore
     const eventData = event.toJSON();
     eventData.participantCount = eventData.participants ? eventData.participants.length : 0;
+    eventData.creatorName = eventData.creator ? eventData.creator.name : 'Sconosciuto';
     delete eventData.participants;
+    delete eventData.creator;
     
     res.json(eventData);
   } catch (error) {
@@ -173,20 +191,29 @@ export const getUserCreatedEvents = async (req, res) => {
     const userId = req.user.id;
     const events = await Event.findAll({
       where: { UserId: userId },
-      include: [{
-        model: User,
-        as: "participants",
-        attributes: ['id'],
-        through: { attributes: [] }
-      }],
+      include: [
+        {
+          model: User,
+          as: "participants",
+          attributes: ['id'],
+          through: { attributes: [] }
+        },
+        {
+          model: User,
+          as: "creator",
+          attributes: ['id', 'name']
+        }
+      ],
       order: [["date", "DESC"]],
     });
     
-    // Aggiungi il conteggio partecipanti
+    // Aggiungi il conteggio partecipanti e il nome del creatore
     const eventsWithCount = events.map(event => {
       const eventData = event.toJSON();
       eventData.participantCount = eventData.participants ? eventData.participants.length : 0;
+      eventData.creatorName = eventData.creator ? eventData.creator.name : 'Sconosciuto';
       delete eventData.participants;
+      delete eventData.creator;
       return eventData;
     });
     
@@ -270,12 +297,19 @@ export const getPopularEvents = async (req, res) => {
 
     const events = await Event.findAll({
       where: { isApproved: true },
-      include: [{
-        model: User,
-        as: "participants",
-        attributes: ['id'],
-        through: { attributes: [] }
-      }],
+      include: [
+        {
+          model: User,
+          as: "participants",
+          attributes: ['id'],
+          through: { attributes: [] }
+        },
+        {
+          model: User,
+          as: "creator",
+          attributes: ['id', 'name']
+        }
+      ],
       order: [["createdAt", "DESC"]]
     });
 
@@ -283,7 +317,9 @@ export const getPopularEvents = async (req, res) => {
     const eventsWithCount = events.map(event => {
       const eventData = event.toJSON();
       eventData.participantCount = eventData.participants ? eventData.participants.length : 0;
+      eventData.creatorName = eventData.creator ? eventData.creator.name : 'Sconosciuto';
       delete eventData.participants; // Rimuovi l'array completo
+      delete eventData.creator;
       return eventData;
     });
 
@@ -311,21 +347,30 @@ export const getUpcomingEvents = async (req, res) => {
         isApproved: true,
         date: { [Op.gte]: now } // Eventi con data >= oggi
       },
-      include: [{
-        model: User,
-        as: "participants",
-        attributes: ['id'],
-        through: { attributes: [] }
-      }],
+      include: [
+        {
+          model: User,
+          as: "participants",
+          attributes: ['id'],
+          through: { attributes: [] }
+        },
+        {
+          model: User,
+          as: "creator",
+          attributes: ['id', 'name']
+        }
+      ],
       order: [["date", "ASC"]], // Dal più vicino al più lontano
       limit: parseInt(limit)
     });
 
-    // Aggiungi il conteggio partecipanti
+    // Aggiungi il conteggio partecipanti e il nome del creatore
     const eventsWithCount = events.map(event => {
       const eventData = event.toJSON();
       eventData.participantCount = eventData.participants ? eventData.participants.length : 0;
+      eventData.creatorName = eventData.creator ? eventData.creator.name : 'Sconosciuto';
       delete eventData.participants; // Rimuovi l'array completo
+      delete eventData.creator;
       return eventData;
     });
 

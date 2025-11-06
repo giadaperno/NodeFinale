@@ -47,7 +47,7 @@ const Event = sequelize.define("Event", {
 });
 
 // Associazioni
-Event.belongsTo(User, { foreignKey: "UserId" }); // ogni evento appartiene a un utente
+Event.belongsTo(User, { foreignKey: "UserId", as: "creator" }); // ogni evento appartiene a un utente
 User.hasMany(Event, { foreignKey: "UserId" });   // un utente può avere molti eventi
 
 export default Event;
