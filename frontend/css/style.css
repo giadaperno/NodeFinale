@@ -372,6 +372,10 @@ header button:hover {
   background: var(--accent);
 }
 
+#logoutBtn i {
+  margin-right: 8px;
+}
+
 #logoutBtn:hover {
   background: var(--primary-dark);
 }
@@ -853,6 +857,10 @@ button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+}
+
+button i {
+  margin-right: 8px;
 }
 
 button:hover {
