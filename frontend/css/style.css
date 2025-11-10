@@ -231,6 +231,10 @@ body {
   margin-bottom: 15px;
 }
 
+.btn-gradient i {
+  margin-right: 8px;
+}
+
 .btn-gradient:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(107, 70, 193, 0.4);
@@ -252,6 +256,10 @@ body {
   cursor: pointer;
   transition: all 0.3s;
   margin-bottom: 15px;
+}
+
+.btn-outline i {
+  margin-right: 8px;
 }
 
 .btn-outline:hover {
