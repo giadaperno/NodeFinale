@@ -185,7 +185,9 @@ body {
   top: 50%;
   transform: translateY(-50%);
   color: var(--primary);
-  font-size: 1.1rem;
+  font-size: 1rem;
+  line-height: 1;
+  text-align: center;
 }
 
 .input-wrapper .toggle-password {
@@ -194,6 +196,7 @@ body {
   cursor: pointer;
   color: #999;
   transition: color 0.2s;
+  pointer-events: auto;
 }
 
 .input-wrapper .toggle-password:hover {
@@ -208,6 +211,8 @@ body {
   font-size: 1rem;
   transition: all 0.3s;
   box-sizing: border-box;
+  line-height: 1.5;
+  height: 48px;
 }
 
 .input-wrapper input:focus {
