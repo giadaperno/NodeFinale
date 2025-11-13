@@ -125,22 +125,22 @@ document.getElementById('updateBtn').addEventListener('click', async () => {
 
   // Client-side validation
   if (!title) {
-    errors.push('❌ Il titolo dell\'evento è obbligatorio.');
+    errors.push('Il titolo dell\'evento è obbligatorio.');
   }
   if (!description) {
-    errors.push('❌ La descrizione dell\'evento è obbligatoria.');
+    errors.push('La descrizione dell\'evento è obbligatoria.');
   }
   if (!category) {
-    errors.push('❌ Seleziona una categoria.');
+    errors.push('Seleziona una categoria.');
   }
   if (!location) {
-    errors.push('❌ Il luogo è obbligatorio.');
+    errors.push('Il luogo è obbligatorio.');
   }
   if (!date) {
-    errors.push('❌ La data è obbligatoria.');
+    errors.push('La data è obbligatoria.');
   }
   if (!capacity || isNaN(capacity) || parseInt(capacity) <= 0) {
-    errors.push('❌ Inserisci una capacità valida (numero positivo).');
+    errors.push('Inserisci una capacità valida (numero positivo).');
   }
 
   if (errors.length > 0) {

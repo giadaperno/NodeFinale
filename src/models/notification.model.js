@@ -10,7 +10,6 @@ const Notification = sequelize.define("Notification", {
   type: {
     type: DataTypes.STRING,
     allowNull: false,
-    // Tipi: 'event-reported', 'user-registered', 'user-unregistered', 'event-created'
   },
   title: {
     type: DataTypes.STRING,

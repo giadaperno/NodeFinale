@@ -17,10 +17,10 @@ export const createTransporter = () => {
   return nodemailer.createTransport({
     host: process.env.SMTP_HOST || "smtp.gmail.com",
     port: port,
-    secure: port === 465, // true per 465, false per 587
+    secure: port === 465, 
     auth: { user, pass },
     tls: {
-      rejectUnauthorized: false // Permette certificati self-signed (alcuni host cloud ne hanno bisogno)
+      rejectUnauthorized: false 
     }
   });
 };
@@ -67,6 +67,6 @@ export const sendPasswordResetEmail = async (to, token, userName) => {
       responseCode: error.responseCode,
       command: error.command
     });
-    throw error; // Rilancia l'errore originale invece di uno generico
+    throw error; 
   }
 };

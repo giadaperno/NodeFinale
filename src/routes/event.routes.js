@@ -21,7 +21,6 @@ router.post("/", verifyToken, createEvent);
 // Lista tutti gli eventi approvati (pubblico)
 router.get("/", listEvents);
 
-// IMPORTANTE: Route specifiche PRIMA delle route parametriche!
 // Eventi più popolari (pubblico)
 router.get("/popular", getPopularEvents);
 
@@ -32,11 +31,9 @@ router.get("/upcoming", getUpcomingEvents);
 router.get("/my-created", verifyToken, getUserCreatedEvents);
 
 // Lista partecipanti di un evento (pubblico o protetto, a tua scelta)
-// DEVE stare prima di /:id per non essere intercettato
 router.get("/:id/participants", getEventParticipants);
 
 // Segnala un evento (notifica agli admin)
-// DEVE stare prima di PUT /:id per non essere intercettato
 router.post("/:id/report", verifyToken, reportEvent);
 
 // Dettaglio di un singolo evento (DOPO le route specifiche!)

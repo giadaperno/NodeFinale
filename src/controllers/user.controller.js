@@ -183,10 +183,6 @@ export const getUserProfile = async (req, res) => {
   }
 };
 
-/**
- * TEMPORANEO: Promuovi utente ad admin (solo per sviluppo)
- * Endpoint: PATCH /api/users/promote-to-admin/:id
- */
 export const promoteToAdmin = async (req, res) => {
   try {
     const { id } = req.params;
