@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EventHub - Registra Admin</title>
+<link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+
+<div class="hero-section" style="height: 220px; margin-bottom: 0;">
+  <h1><i class="fas fa-user-shield"></i> Registra Admin</h1>
+  <p>Crea un account amministratore (uso interno)</p>
+</div>
+
+<div class="auth-container auth-enhanced">
+  <div class="auth-icon-wrapper">
+    <i class="fas fa-user-shield"></i>
+  </div>
+
+  <h2 style="color: var(--primary-dark); margin-bottom: 30px; font-size: 1.5rem;">Registra un nuovo Admin</h2>
+
+  <div class="input-wrapper">
+    <i class="fas fa-user"></i>
+    <input type="text" id="name" placeholder="Nome completo">
+  </div>
+
+  <div class="input-wrapper">
+    <i class="fas fa-envelope"></i>
+    <input type="email" id="email" placeholder="Email">
+  </div>
+  
+  <div class="input-wrapper">
+    <i class="fas fa-lock"></i>
+    <input type="password" id="password" placeholder="Password">
+    <i class="fas fa-eye toggle-password" id="togglePassword"></i>
+  </div>
+
+  <div style="background: #F3E8FF; padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 0.85rem; color: var(--primary-dark);">
+    <i class="fas fa-info-circle"></i> La password deve contenere almeno 6 caratteri
+  </div>
+
+  <button id="registerBtn" class="btn-gradient">
+    <i class="fas fa-user-plus"></i> Crea Admin
+  </button>
+  <button id="homeBtn" class="btn-outline">
+    <i class="fas fa-home"></i> Torna alla home
+  </button>
+
+  <div class="auth-divider">
+    <span>oppure</span>
+  </div>
+
+  <div class="link" style="margin-top: 20px;">
+    Hai già un account? <a href="/login.html" style="color: var(--primary); font-weight: 600; text-decoration: none;">Accedi ora <i class="fas fa-arrow-right"></i></a>
+  </div>
+
+  <div id="message" class="message-box"></div>
+</div>
+
+<script>
+async function handleRegisterAdmin() {
+  const name = document.getElementById('name').value;
+  const email = document.getElementById('email').value;
+  const password = document.getElementById('password').value;
+  const messageDiv = document.getElementById('message');
+
+  // Reset message
+  messageDiv.className = 'message-box';
+  messageDiv.textContent = '';
+
+  // Validazione base
+  if (!name || !email || !password) {
+    messageDiv.className = 'message-box error';
+    messageDiv.innerHTML = '<i class="fas fa-exclamation-circle"></i> Compila tutti i campi';
+    return;
+  }
+
+  if (password.length < 6) {
+    messageDiv.className = 'message-box error';
+    messageDiv.innerHTML = '<i class="fas fa-exclamation-circle"></i> La password deve contenere almeno 6 caratteri';
+    return;
+  }
+
+  try {
+    // Registra con ruolo admin
+    const res = await fetch('/api/auth/register', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ name, email, password, role: 'admin' })
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      messageDiv.className = 'message-box success';
+      messageDiv.innerHTML = '<i class="fas fa-check-circle"></i> Admin creato con successo! Reindirizzamento al login...';
+      setTimeout(() => { window.location.href = '/login.html'; }, 1500);
+    } else {
+      messageDiv.className = 'message-box error';
+      messageDiv.innerHTML = '<i class="fas fa-exclamation-circle"></i> ' + (data.message || 'Errore durante la registrazione');
+    }
+  } catch (err) {
+    console.error(err);
+    messageDiv.className = 'message-box error';
+    messageDiv.innerHTML = '<i class="fas fa-times-circle"></i> Errore server. Riprova più tardi.';
+  }
+}
+
+document.getElementById('registerBtn').addEventListener('click', handleRegisterAdmin);
+
+// Permetti registrazione con tasto Enter
+document.querySelectorAll('#name, #email, #password').forEach(input => {
+  input.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+      handleRegisterAdmin();
+    }
+  });
+});
+
+document.getElementById('homeBtn').addEventListener('click', () => {
+  window.location.href = '/index.html';
+});
+
+// Toggle visibilità password
+document.getElementById('togglePassword').addEventListener('click', function() {
+  const passwordInput = document.getElementById('password');
+  
+  if (passwordInput.type === 'password') {
+    passwordInput.type = 'text';
+    this.classList.remove('fa-eye');
+    this.classList.add('fa-eye-slash');
+  } else {
+    passwordInput.type = 'password';
+    this.classList.remove('fa-eye-slash');
+    this.classList.add('fa-eye');
+  }
+});
+
+// Animazione focus sugli input
+document.querySelectorAll('.input-wrapper input').forEach(input => {
+  input.addEventListener('focus', function() {
+    this.parentElement.style.transform = 'scale(1.02)';
+    this.parentElement.style.transition = 'transform 0.2s';
+  });
+  
+  input.addEventListener('blur', function() {
+    this.parentElement.style.transform = 'scale(1)';
+  });
+});
+</script>
+
+</body>
+</html>
